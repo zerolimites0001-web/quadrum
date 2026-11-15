@@ -1,5 +1,14 @@
 # Histórico
 
+## 0.3.2
+
+- Exportação e importação do HUD em JSON, preservando precisão dos valores e
+  configurações de retrato/paisagem no mesmo arquivo.
+- Importação como prévia, com Salvar/Cancelar e validação estrita de formato/tamanho.
+- Arquivo inválido não substitui o rascunho nem o layout salvo.
+- Proteção contra importações assíncronas antigas sobrescreverem uma nova sessão/escolha.
+- Verificações mantidas e executadas apenas localmente, sem arquivos de teste no envio.
+
 ## 0.3.1
 
 - Editor de HUD na pausa e nos ajustes, com 15 elementos movíveis/redimensionáveis.

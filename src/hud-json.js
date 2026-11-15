@@ -1,0 +1,13 @@
+import {HUD_ELEMENTS,emptyLayout} from './hud-layout.js';
+export const HUD_JSON_MAX_BYTES=64*1024;
+const definitions=new Map(HUD_ELEMENTS.map(def=>[def.key,def]));
+const object=value=>value!==null&&typeof value==='object'&&!Array.isArray(value);
+function keys(value,allowed,label){if(!object(value))throw new Error(label+' precisa ser um objeto JSON.');for(const key of Object.keys(value))if(!allowed.includes(key))throw new Error('Campo não reconhecido em '+label+': '+key);}
+// Não arredonda números nem corrige silenciosamente um arquivo de outra estrutura.
+export function validateHudLayout(raw){keys(raw,['version','profiles'],'HUD');if(raw.version!==1)throw new Error('Versão de HUD não suportada. Esperado: version 1.');keys(raw.profiles,['portrait','landscape'],'profiles');const result=emptyLayout();
+ for(const orientation of ['portrait','landscape']){const profile=raw.profiles[orientation];if(!object(profile))throw new Error('O arquivo precisa dos perfis portrait e landscape, mesmo que estejam vazios.');for(const key of Object.keys(profile)){const def=definitions.get(key);if(!def)throw new Error('Elemento de HUD desconhecido: '+key);const entry=profile[key];keys(entry,['x','y','scale'],orientation+'.'+key);if(![entry.x,entry.y,entry.scale].every(value=>typeof value==='number'&&Number.isFinite(value)))throw new Error('x, y e scale precisam ser números finitos em '+key+'.');if(entry.x<0||entry.x>1||entry.y<0||entry.y>1)throw new Error('Posições x/y devem estar entre 0 e 1 em '+key+'.');if(entry.scale<(def.minScale??.65)||entry.scale>(def.maxScale??2.5))throw new Error('Tamanho fora do intervalo permitido em '+key+'.');if(def.movable===false&&(entry.x!==.5||entry.y!==.5))throw new Error('A mira deve permanecer no centro: x e y iguais a 0.5.');result.profiles[orientation][key]={x:entry.x,y:entry.y,scale:entry.scale};}}
+ return result;
+}
+export function serializeHudLayout(layout){return JSON.stringify(validateHudLayout(layout),null,2)+'\n';}
+export function parseHudLayout(text){if(typeof text!=='string')throw new Error('Conteúdo JSON inválido.');if(new TextEncoder().encode(text).byteLength>HUD_JSON_MAX_BYTES)throw new Error('Arquivo de HUD maior que 64 KB.');let raw;try{raw=JSON.parse(text.replace(/^\uFEFF/,''));}catch{throw new Error('JSON inválido. Selecione um arquivo exportado pelo editor de HUD.');}return validateHudLayout(raw);}
+export async function readHudFile(file){if(!file||typeof file.text!=='function')throw new Error('Selecione um arquivo JSON.');if(file.size>HUD_JSON_MAX_BYTES)throw new Error('Arquivo de HUD maior que 64 KB.');return parseHudLayout(await file.text());}

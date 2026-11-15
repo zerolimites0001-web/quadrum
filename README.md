@@ -9,7 +9,7 @@
 Jogue direto no navegador, sem instalar. Os mundos ficam salvos no navegador
 desse endereço; use a exportação de mundos para fazer backups ou transferi-los.
 
-![Versão](https://img.shields.io/badge/vers%C3%A3o-0.3.1-77a75c)
+![Versão](https://img.shields.io/badge/vers%C3%A3o-0.3.2-77a75c)
 ![JavaScript](https://img.shields.io/badge/JavaScript-ES_modules-f7df1e)
 ![Three.js](https://img.shields.io/badge/Three.js-local-222222)
 [![Licença MIT](https://img.shields.io/badge/licen%C3%A7a-MIT-blue.svg)](LICENSE)
@@ -128,6 +128,10 @@ Entre no mundo e abra **Pausa → Editar HUD** ou **Ajustes → Editar HUD**.
 - Faça ajustes finos pelos controles X/Y e setas.
 - **↕** move o painel entre topo/baixo; **▤** recolhe as opções.
 - **Salvar HUD** grava o layout; **Cancelar**/Esc descarta o rascunho.
+- **Exportar HUD · JSON** baixa `quadrum-hud.json` com o rascunho atual, nos dois
+  perfis, sem arredondar posições ou escalas.
+- **Importar HUD · JSON** aplica uma prévia; só substitui o save ao tocar em
+  **Salvar HUD**. Arquivos inválidos não apagam a configuração atual.
 - Restaure o padrão de um item ou de toda a orientação atual, sem perder o outro perfil.
 
 Retrato e paisagem têm layouts independentes. Os controles são limitados à área
@@ -138,6 +142,26 @@ O layout fica no localStorage, chave `quadrum-hud-layout-v1`, por origem/perfil 
 navegador. Não modifica o mundo nem os arquivos de mods. Limpar os dados do site
 apaga esse layout; um erro de gravação é mostrado sem descartar o rascunho.
 Interfaces próprias de mods não são editadas nesta versão.
+
+O arquivo usa o mesmo esquema do armazenamento, sem wrapper ou timestamp:
+
+```json
+{
+  "version": 1,
+  "profiles": {
+    "portrait": {
+      "action-place": {"x": 0.8123456789012345, "y": 0.7123456789012345, "scale": 1.23456789012345}
+    },
+    "landscape": {}
+  }
+}
+```
+
+Perfis vazios usam o padrão. A ida/volta preserva os números; o ajuste visual aos
+limites de outra tela não regrava esses valores. A importação é manual, limitada
+a 64 KB, sem execução de código ou rede. Versões, campos, posições ou escalas
+inválidas são recusados em vez de corrigidos silenciosamente.
+
 
 ## Controles
 

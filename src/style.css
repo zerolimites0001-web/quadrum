@@ -20,3 +20,5 @@ body.hud-editing #touch-controls{display:block!important}body.hud-editing #hud{d
 @media(max-height:500px){#hud-edit-toolbar{max-height:85dvh;width:min(460px,75vw)}#hud-edit-toolbar p{margin:5px 0}#hud-edit-toolbar label{margin:5px 0}}
 
 .hud-layout-custom #block-label{white-space:nowrap}
+
+.hud-json-actions{display:flex;gap:7px;margin-top:8px}.hud-json-actions button{flex:1;min-width:0}#hud-edit-import-file{display:none!important}

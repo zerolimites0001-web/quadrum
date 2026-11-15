@@ -2,6 +2,13 @@
 
 **Construa, voe e explore um mundo voxel direto no navegador.**
 
+## Jogar online
+
+**[▶ Abrir Quadrum — quadrum-chi.vercel.app](https://quadrum-chi.vercel.app/)**
+
+Jogue direto no navegador, sem instalar. Os mundos ficam salvos no navegador
+desse endereço; use a exportação de mundos para fazer backups ou transferi-los.
+
 [![Testes](https://github.com/zerolimites0001-web/quadrum/actions/workflows/tests.yml/badge.svg)](https://github.com/zerolimites0001-web/quadrum/actions/workflows/tests.yml)
 ![Versão](https://img.shields.io/badge/vers%C3%A3o-0.2.1-77a75c)
 ![JavaScript](https://img.shields.io/badge/JavaScript-ES_modules-f7df1e)
@@ -21,6 +28,7 @@ Shaders extras são opcionais: o jogo-base não carrega o mod de água sozinho.
 
 ## Navegação
 
+- [Jogar online](https://quadrum-chi.vercel.app/)
 - [Executar](#executar)
 - [Recursos](#recursos)
 - [Controles](#controles)

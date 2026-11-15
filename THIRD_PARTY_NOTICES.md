@@ -45,9 +45,9 @@ como arte original do projeto, nem devem ser assumidos como recursos de uso irre
 
 ## Código e exemplos do projeto
 
-O código e os exemplos específicos do Quadrum estão publicados para consulta.
-Nenhuma licença geral adicional de código foi escolhida nesta publicação.
-Repositório público não equivale a domínio público ou a uma licença irrestrita.
-Os direitos dos recursos de terceiros continuam separados dos direitos do código.
+O código original, a documentação e os exemplos de mods específicos do Quadrum
+são licenciados sob a MIT License, cujo texto está em `LICENSE` na raiz do projeto.
+Essa licença não relicencia as texturas, referências visuais ou bibliotecas de
+terceiros: os respectivos direitos, avisos e condições continuam aplicáveis.
 
 Quadrum não é afiliado, aprovado ou patrocinado pela Mojang ou Microsoft.

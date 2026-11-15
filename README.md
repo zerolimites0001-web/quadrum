@@ -13,6 +13,7 @@ desse endereço; use a exportação de mundos para fazer backups ou transferi-lo
 ![Versão](https://img.shields.io/badge/vers%C3%A3o-0.2.1-77a75c)
 ![JavaScript](https://img.shields.io/badge/JavaScript-ES_modules-f7df1e)
 ![Three.js](https://img.shields.io/badge/Three.js-local-222222)
+[![Licença MIT](https://img.shields.io/badge/licen%C3%A7a-MIT-blue.svg)](LICENSE)
 
 Quadrum é um jogo voxel em modo criativo, desenvolvido para **celular e desktop**.
 Tem terreno procedural por chunks, construção livre, voo, mundos persistentes e
@@ -262,6 +263,17 @@ navegador real; os testes de lógica não substituem essa verificação.
 
 Para relatar bugs e propor alterações, veja [CONTRIBUTING.md](CONTRIBUTING.md).
 
+## Licença
+
+O código original, a documentação e os exemplos de mods do Quadrum são
+licenciados sob a **[MIT License](LICENSE)**. Você pode usar, modificar e
+redistribuir esse software, inclusive comercialmente, preservando os avisos
+exigidos pela licença. O software é fornecido sem garantias.
+
+**Recursos de terceiros não são relicenciados por essa autorização.** Texturas
+Minecraft/Bedrock Samples, imagens de referência e bibliotecas mantêm seus
+próprios direitos e termos, descritos abaixo e nos avisos de terceiros.
+
 ## Créditos e direitos
 
 - Three.js está incluído com sua licença MIT em
@@ -273,5 +285,5 @@ Para relatar bugs e propor alterações, veja [CONTRIBUTING.md](CONTRIBUTING.md)
   comprovem o estado atual do jogo.
 
 Consulte [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) e os termos dos recursos
-antes de redistribuir. A publicação do repositório não altera os direitos de terceiros
-nem representa uma licença geral para todos os arquivos.
+antes de redistribuir. A MIT do código do Quadrum não altera os direitos de
+terceiros nem autoriza automaticamente o uso de todos os recursos gráficos.

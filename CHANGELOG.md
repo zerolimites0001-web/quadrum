@@ -1,5 +1,14 @@
 # Histórico
 
+## 0.3.1
+
+- Editor de HUD na pausa e nos ajustes, com 15 elementos movíveis/redimensionáveis.
+- Posições proporcionais, limites de tela e perfis separados por orientação.
+- Salvar, cancelar e restaurar padrão por item ou orientação; persistência local.
+- Mira redimensionável sem alterar seu centro ou a pontaria.
+- Joystick ajustado para coordenadas locais e limite do cursor ao usar escala.
+- Testes executados somente no aparelho e não incluídos na publicação.
+
 ## 0.3.0
 
 - Promovida a versão local aprovada pelo usuário, sem copiar dados pessoais do navegador.

@@ -9,7 +9,7 @@
 Jogue direto no navegador, sem instalar. Os mundos ficam salvos no navegador
 desse endereço; use a exportação de mundos para fazer backups ou transferi-los.
 
-![Versão](https://img.shields.io/badge/vers%C3%A3o-0.3.2-77a75c)
+![Versão](https://img.shields.io/badge/vers%C3%A3o-0.3.3-77a75c)
 ![JavaScript](https://img.shields.io/badge/JavaScript-ES_modules-f7df1e)
 ![Three.js](https://img.shields.io/badge/Three.js-local-222222)
 [![Licença MIT](https://img.shields.io/badge/licen%C3%A7a-MIT-blue.svg)](LICENSE)
@@ -118,6 +118,24 @@ O sol tem um halo suave aditivo; olhar para ele não causa dano, cegueira, alter
 de exposição, lens flare ou God Rays. A lua usa a textura oficial incluída.
 Desative mods que substituem céu/luzes/reflexos ao conferir os novos efeitos,
 pois a combinação de vários sistemas gráficos não é garantida.
+
+## Mão em primeira pessoa
+
+Mão voxel com animações próprias para **quebrar**, **colocar** e **usar**.
+O bloco/item segurado acompanha a hotbar, incluindo formas parciais e itens de mods.
+Há um pequeno balanço ao andar e movimento de troca de slot, sem alterar a câmera.
+
+Em **Ajustes**, é possível desligar separadamente:
+
+- **Mão em primeira pessoa**.
+- **Mostrar bloco/item na mão**.
+- **Balanço da mão ao andar**.
+
+As preferências ficam salvas neste navegador. A mão usa malhas simples e texturas
+procedurais originais, sem baixar uma skin externa. Seu passe de desenho é separado
+do mundo: não entra em reflexos, raycasts ou colisão, e não cobre os controles DOM.
+Pausa, inventário e editor de HUD não exibem a mão. Não há corpo em terceira pessoa
+ou mineração progressiva: as animações são uma apresentação visual das ações.
 
 ## Editor de HUD
 

@@ -1,5 +1,14 @@
 # Histórico
 
+## 0.3.3
+
+- Mão voxel em primeira pessoa, com animações distintas de quebra, colocação e uso.
+- Prévia do bloco/item da hotbar e movimento suave ao andar/trocar de slot.
+- Preferências para mão, bloco segurado e balanço, persistidas no navegador.
+- Cena separada do mundo e dos reflexos; animação limpa ao pausar/sair.
+- Prévia atualizada quando o conteúdo de um mod desaparece ou muda de aparência.
+- Versão aprovada no LAB; verificações mantidas e executadas apenas localmente.
+
 ## 0.3.2
 
 - Exportação e importação do HUD em JSON, preservando precisão dos valores e

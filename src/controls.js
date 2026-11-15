@@ -6,8 +6,8 @@ export class Controls {
  lock(){if(!this.touch&&this.enabled&&document.pointerLockElement!==this.canvas){try{const promise=this.canvas.requestPointerLock?.();promise?.catch?.(()=>{});}catch{}}}
  unlock(){if(document.pointerLockElement)document.exitPointerLock();}
  bind(){
-  window.addEventListener('keydown',e=>{if(!this.enabled)return;const key=e.code;if(['Space','Tab','ArrowUp','ArrowDown'].includes(key))e.preventDefault();if(e.repeat)return;if(key==='Escape'){e.preventDefault();this.cb.pause();return;}if(key==='KeyE'||key==='Tab'){e.preventDefault();this.cb.inventory();return;}if(key==='KeyF'){this.cb.fly();return;}if(key==='Space')this.jumpTap();if(/^Digit[1-9]$/.test(key))this.cb.slot(Number(key.slice(-1))-1);this.keys.add(key);});
-  window.addEventListener('keyup',e=>this.keys.delete(e.code));
+  window.addEventListener('keydown',e=>{if(!this.enabled)return;const key=e.code;if(['Space','Tab','ArrowUp','ArrowDown'].includes(key))e.preventDefault();if(e.repeat)return;if(key==='Escape'){e.preventDefault();this.cb.pause();return;}if(key==='KeyE'||key==='Tab'){e.preventDefault();this.cb.inventory();return;}if(key==='KeyF'){this.cb.fly();return;}if(key==='KeyR')this.actions.add('use');if(key==='Space')this.jumpTap();if(/^Digit[1-9]$/.test(key))this.cb.slot(Number(key.slice(-1))-1);this.keys.add(key);});
+  window.addEventListener('keyup',e=>{this.keys.delete(e.code);if(e.code==='KeyR')this.actions.delete('use');});
   window.addEventListener('blur',()=>{this.clear();if(this.enabled)this.cb.pause();});
   document.addEventListener('pointerlockchange',()=>{if(!document.pointerLockElement&&this.enabled&&!this.touch)this.cb.pause();});
   this.canvas.addEventListener('contextmenu',e=>e.preventDefault());

@@ -3,14 +3,15 @@
 ## Ambiente leve
 
 - Python 3 para servir o jogo: `python3 server.py --port 8081`.
-- Node.js 24+ para testes: `npm test`.
+- Node.js 24+ é opcional para verificações locais do desenvolvedor.
 - Nenhum `npm install`, bundler ou navegador automatizado é obrigatório.
 
 ## Antes de enviar uma alteração
 
 1. Abra uma issue ou descreva claramente o objetivo no pull request.
 2. Preserve o funcionamento no celular: joystick, câmera e ações simultâneas.
-3. Execute `npm test` e adicione uma regressão quando corrigir um bug.
+3. Valide a alteração localmente e descreva os cenários conferidos. Mantenha os
+   testes somente no aparelho: não envie pastas tests, fixtures ou relatórios.
 4. Confira o comportamento no navegador real quando alterar WebGL, UI, IndexedDB,
    importação de arquivos ou Service Worker.
 5. Não acrescente buscas automáticas de mods no disco nem permissões desnecessárias.

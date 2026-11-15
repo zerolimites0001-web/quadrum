@@ -1,5 +1,19 @@
 # Histórico
 
+## 0.3.0
+
+- Promovida a versão local aprovada pelo usuário, sem copiar dados pessoais do navegador.
+- Escadas/lajes em 17 materiais e portas de nove madeiras, com texturas oficiais,
+  orientação, formas parciais, colisão e raycast precisos.
+- Portas de duas metades, abertura/fechamento, apoio e proteção contra fechar no jogador.
+- Dia de 600s, noite de 490s, amanhecer/crepúsculo, sol com halo e lua oficial com fases.
+- Chuva/neve/neblina, gotas amostradas de 1×1 pixel da água e cobertura por tetos.
+- Poças visuais com reflexo planar: espera de 300s após a chuva e secagem gradual de 180s.
+- Céu em clip-space e nuvens com ruído filtrado para corrigir faixas/triângulos no celular.
+- Flocos menores com textura suave e chuva mais clara.
+- Testes retirados do versionamento e mantidos somente no aparelho, conforme solicitado;
+  removida a CI que dependia deles. 77 verificações de lógica passaram localmente.
+
 ## 0.2.2
 
 - Ativação/desativação de mods persistida por pacote no IndexedDB, com migração

@@ -99,3 +99,34 @@ export function restorePalette(palette){
   }map.set(oldId,id);
  });return map;
 }
+
+BLOCKS[ID.bricks].texture='brick';BLOCKS[ID.sandstone].texture='sandstone_normal';for(const key of ['cherry','mangrove','pale_oak'])BLOCKS[ID[key+'_planks']].texture=key+'_planks';
+
+// LAB: estados são IDs próprios, portanto continuam compatíveis com a paleta do save.
+export const ARCHITECTURE=[];
+const rotateBox=(box,turn)=>{let [x0,y0,z0,x1,y1,z1]=box;for(let i=0;i<turn;i++)[x0,z0,x1,z1]=[1-z1,x0,1-z0,x1];return[x0,y0,z0,x1,y1,z1];};
+const materials=[
+ ['oak','carvalho','planks_oak',ID.planks],['spruce','pinheiro','planks_spruce',ID.spruce_planks],['birch','bétula','planks_birch',ID.birch_planks],['jungle','madeira da selva','planks_jungle',ID.jungle_planks],['acacia','acácia','planks_acacia',ID.acacia_planks],['dark_oak','carvalho escuro','planks_big_oak',ID.dark_oak_planks],['cherry','cerejeira','cherry_planks',ID.cherry_planks],['mangrove','mangue','mangrove_planks',ID.mangrove_planks],['pale_oak','carvalho pálido','pale_oak_planks',ID.pale_oak_planks],
+ ['stone','pedra','stone',ID.stone],['cobble','pedregulho','cobblestone',ID.cobble],['bricks','tijolos','brick',ID.bricks],['stonebrick','tijolos de pedra','stonebrick',ID.stone_bricks],['sandstone','arenito','sandstone_normal',ID.sandstone],['red_sandstone','arenito vermelho','red_sandstone_normal',ID.red_sandstone],['quartz','quartzo','quartz_block_side',ID.quartz],['deepslate','ardósia','deepslate',ID.deepslate]
+];
+for(const [key,name,texture,fullBlock] of materials){
+ const stairs={bottom:[],top:[]},slabs={bottom:[],top:[]};let stairsBase,slabBase;
+ for(const half of ['bottom','top'])for(let facing=0;facing<4;facing++){
+  const boxes=(half==='bottom'?[[0,0,0,1,.5,1],[0,.5,0,1,1,.5]]:[[0,.5,0,1,1,1],[0,0,0,1,.5,.5]]).map(b=>rotateBox(b,facing));
+  const id=registerBlock('lab',`stairs_${key}_${half}_${facing}`,{name:'Escada de '+name,category:'Escadas',texture,top:BLOCKS[fullBlock].top,bottom:BLOCKS[fullBlock].bottom,color:'#9b8d76',shape:'stairs',family:'stairs:'+key,facing,half,boxes,hidden:half!=='bottom'||facing!==0});stairs[half][facing]=id;stairsBase??=id;
+ }
+ for(const half of ['bottom','top']){const id=registerBlock('lab',`slab_${key}_${half}`,{name:'Laje de '+name,category:'Lajes',texture,top:BLOCKS[fullBlock].top,bottom:BLOCKS[fullBlock].bottom,color:'#9b8d76',shape:'slab',family:'slab:'+key,half,boxes:[[0,half==='top'?.5:0,0,1,half==='top'?1:.5,1]],fullBlock,hidden:half!=='bottom'});slabs[half].push(id);slabBase??=id;}
+ for(const id of [...stairs.bottom,...stairs.top])Object.assign(BLOCKS[id],{variants:stairs,inventoryId:stairsBase});
+ for(const id of [...slabs.bottom,...slabs.top])Object.assign(BLOCKS[id],{variants:slabs,inventoryId:slabBase});
+ ARCHITECTURE.push(stairsBase,slabBase);
+}
+const doorTextures={oak:['door_wood_lower','door_wood_upper'],spruce:['door_spruce_lower','door_spruce_upper'],birch:['door_birch_lower','door_birch_upper'],jungle:['door_jungle_lower','door_jungle_upper'],acacia:['door_acacia_lower','door_acacia_upper'],dark_oak:['door_dark_oak_lower','door_dark_oak_upper'],cherry:['cherry_door_bottom','cherry_door_top'],mangrove:['mangrove_door_bottom','mangrove_door_top'],pale_oak:['pale_oak_door_bottom','pale_oak_door_top']};
+for(const [key,name] of materials.slice(0,9)){
+ const variants={closed:{lower:[],upper:[]},open:{lower:[],upper:[]}};let base;
+ for(const state of ['closed','open'])for(const part of ['lower','upper'])for(let facing=0;facing<4;facing++){
+  const boxes=[rotateBox(state==='closed'?[0,0,.8125,1,1,1]:[0,0,0,.1875,1,1],facing)];
+  const id=registerBlock('lab',`door_${key}_${state}_${part}_${facing}`,{name:'Porta de '+name,category:'Portas',texture:doorTextures[key][part==='lower'?0:1],color:'#a78e6a',shape:'door',family:'door:'+key,part,facing,open:state==='open',boxes,hidden:state!=='closed'||part!=='lower'||facing!==0});variants[state][part][facing]=id;base??=id;
+ }
+ for(const state of ['closed','open'])for(const part of ['lower','upper'])for(const id of variants[state][part]){const b=BLOCKS[id];Object.assign(b,{variants,inventoryId:base,mateId:variants[state][part==='lower'?'upper':'lower'][b.facing],toggleId:variants[state==='open'?'closed':'open'][part][b.facing]});}
+ ARCHITECTURE.push(base);
+}

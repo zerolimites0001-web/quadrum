@@ -140,7 +140,7 @@ const wand = await api.items.register('varinha', {
 });
 ```
 
-Blocos são cubos; `plant:true, solid:false` usa planos cruzados e `liquid:true`
+Blocos de mods continuam cúbicos por padrão; `plant:true, solid:false` usa planos cruzados e `liquid:true`
 usa o tratamento de líquido. Transparência precisa de `transparent:true` e alpha
 na textura. Bancadas, TNT e outros blocos do jogo-base são decorativos nesta etapa.
 Formas/colliders personalizados não são uma API de blocos pronta: objetos extras
@@ -273,3 +273,16 @@ jogo, `window.onresize=...`, referências nativas guardadas e recursos WebGL raw
 não necessariamente são reversíveis pelos hooks. Para esses casos registre uma
 limpeza com `api.onDispose(fn)`. Alterar renderer/câmera exige restaurar o estado.
 Não prometa a usuários que desligar código malicioso recupera uma página travada.
+
+
+## Céu e peças de construção a partir de 0.3.0
+
+O jogo possui um controlador próprio de céu/clima, com relógio e secagem de poças
+salvos em `world.meta.environment`. Mods que substituem sol, luzes ou reflexos
+podem disputar esses recursos; evite ativar dois controladores gráficos ao mesmo tempo.
+
+As escadas/lajes/portas integradas usam estados com chaves no namespace `lab:`
+para preservar a compatibilidade com os saves aprovados no laboratório. Esse nome
+interno não significa que o recurso esteja desativado. As variantes ficam ocultas
+no inventário, que mostra apenas as peças-base. O raycast devolve `point` e `bounds`
+para a forma atingida; não presuma mais que todo bloco sólido ocupa o cubo inteiro.

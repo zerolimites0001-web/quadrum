@@ -17,3 +17,14 @@ Thumbs.db
 # Backups pessoais de mundos, se copiados para o projeto
 /backups/
 /saves/
+
+# Testes são exclusivamente locais: nunca versionar ou enviar.
+tests/
+**/tests/
+__tests__/
+*.test.*
+*.spec.*
+coverage/
+test-results/
+playwright-report/
+.github/workflows/tests.yml

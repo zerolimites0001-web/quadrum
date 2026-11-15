@@ -1,0 +1,6 @@
+Texturas oficiais obtidas do Minecraft Bedrock Samples:
+https://raw.githubusercontent.com/Mojang/bedrock-samples/main/resource_pack/textures/blocks/
+https://raw.githubusercontent.com/Mojang/bedrock-samples/main/resource_pack/textures/environment/moon_phases.png
+As texturas mantêm os direitos e termos dos respectivos titulares (Mojang/Microsoft).
+Escadas/lajes reutilizam as texturas oficiais dos materiais correspondentes.
+Chuva: amostras 1x1 da textura water_still.png já incluída, sem uma nova textura de chuva.

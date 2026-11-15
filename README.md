@@ -9,8 +9,7 @@
 Jogue direto no navegador, sem instalar. Os mundos ficam salvos no navegador
 desse endereço; use a exportação de mundos para fazer backups ou transferi-los.
 
-[![Testes](https://github.com/zerolimites0001-web/quadrum/actions/workflows/tests.yml/badge.svg)](https://github.com/zerolimites0001-web/quadrum/actions/workflows/tests.yml)
-![Versão](https://img.shields.io/badge/vers%C3%A3o-0.2.2-77a75c)
+![Versão](https://img.shields.io/badge/vers%C3%A3o-0.3.0-77a75c)
 ![JavaScript](https://img.shields.io/badge/JavaScript-ES_modules-f7df1e)
 ![Three.js](https://img.shields.io/badge/Three.js-local-222222)
 [![Licença MIT](https://img.shields.io/badge/licen%C3%A7a-MIT-blue.svg)](LICENSE)
@@ -21,7 +20,8 @@ uma API de mods com acesso ao Three.js e aos sistemas do jogo.
 
 **Sem build, sem dependências npm para jogar e sem downloads de bibliotecas em
 runtime.** O Three.js e os recursos necessários estão incluídos no repositório.
-Shaders extras são opcionais: o jogo-base não carrega o mod de água sozinho.
+O jogo-base não carrega mods sozinho. Céu e poças usam shaders integrados;
+o shader de água de um pacote continua sendo opcional.
 
 > Projeto em desenvolvimento. Não é uma implementação completa do Minecraft,
 > nem um produto oficial da Mojang/Microsoft. Muitos blocos são decorativos;
@@ -36,7 +36,7 @@ Shaders extras são opcionais: o jogo-base não carrega o mod de água sozinho.
 - [Mundos e backups](#mundos-e-backups)
 - [Mods](#mods)
 - [Estrutura](#estrutura)
-- [Testes e contribuição](#testes-e-contribuição)
+- [Validação e contribuição](#validação-e-contribuição)
 - [API de mods](MODDING.md)
 - [Histórico de alterações](CHANGELOG.md)
 - [Créditos e recursos de terceiros](THIRD_PARTY_NOTICES.md)
@@ -74,7 +74,15 @@ O servidor fornecido serve somente a pasta do projeto, por padrão em loopback.
 ## Recursos
 
 - **Modo criativo:** quebrar, colocar, selecionar blocos e voar.
-- **221 blocos e plantas**, com inventário pesquisável e categorias.
+- **264 blocos, plantas e peças de construção visíveis**, com inventário pesquisável.
+- **Escadas e lajes em 17 materiais**, com orientação, variantes invertidas,
+  colisão e seleção pela forma.
+- **Portas funcionais de nove madeiras**, com duas metades vinculadas e abrir/fechar.
+- **Dia de 10 minutos e noite de 8 minutos e 10 segundos**, com amanhecer,
+  crepúsculo, lua oficial com fases e sol procedural com halo suave.
+- **Chuva, neve e neblina**, incluindo variação automática por bioma.
+- **Poças com reflexos planares**: esperam 5 minutos após a chuva e secam
+  gradualmente nos 3 minutos seguintes, sem substituir blocos.
 - **16 biomas**, incluindo florestas, taiga, selva, savana, deserto, manguezal,
   cerejeiras, bosque pálido, tundra, montanhas, praias e oceano.
 - **Nove variantes de árvores**, com troncos e folhas da espécie correspondente.
@@ -89,6 +97,28 @@ O servidor fornecido serve somente a pasta do projeto, por padrão em loopback.
   efeitos, shaders, render targets e acesso à câmera/canvas/cena/Three.js.
 - Desligamento rastreado por `kill.js`, com preservação de blocos nos saves.
 
+## Céu, clima e construção
+
+No inventário, procure **Escadas**, **Lajes** e **Portas**. Escadas acompanham a
+direção do jogador; lajes podem ocupar a metade superior/inferior e duas iguais
+completam o bloco correspondente. As portas exigem apoio e dois blocos livres;
+quebrar uma metade ou o apoio remove o par. Não fecham sobre o jogador.
+
+O botão **☀** abre o painel de clima e ciclo. Nele, você pode escolher horários,
+forçar chuva/neve/neblina, ligar o modo automático e reduzir efeitos para celular.
+O ciclo e os temporizadores ficam salvos com o mundo e param durante a pausa.
+
+A chuva usa a cor de um recorte **1×1 de water_still.png**, sem baixar uma textura
+nova de chuva. Neve é visual e não substitui suas construções. Poças surgem em
+superfícies expostas elegíveis e não ocupam blocos. Seu reflexo é um passe planar
+128px da altura predominante, limitado a cerca de 4 atualizações/s, não ray tracing.
+Se ficar pesado, desligue reflexos no painel antes de aumentar a distância de visão.
+
+O sol tem um halo suave aditivo; olhar para ele não causa dano, cegueira, alteração
+de exposição, lens flare ou God Rays. A lua usa a textura oficial incluída.
+Desative mods que substituem céu/luzes/reflexos ao conferir os novos efeitos,
+pois a combinação de vários sistemas gráficos não é garantida.
+
 ## Controles
 
 ### Celular
@@ -99,6 +129,7 @@ O servidor fornecido serve somente a pasta do projeto, por padrão em loopback.
 | Olhar | Arrastar no mundo |
 | Quebrar / colocar | Botões próprios à direita |
 | Pular | PULAR |
+| Abrir/fechar porta | USAR ou COLOCAR mirando a porta |
 | Alternar voo | VOAR / ANDAR ou duplo toque em pular |
 | Subir / descer voando | ▲ / ▼ |
 | Inventário | ▦ |
@@ -122,6 +153,7 @@ O servidor fornecido serve somente a pasta do projeto, por padrão em loopback.
 | Descer voando | Shift |
 | Acelerar | Ctrl |
 | Pausar | Esc |
+| Usar/abrir porta | R ou clique direito |
 
 ## Mundos e backups
 
@@ -244,30 +276,21 @@ vendor/                Three.js local e sua licença
 assets/textures/       Texturas e manifesto
 examples/mods/         Exemplos de mods, fontes e ZIP pronto
 examples_ui/           Imagens de referência fornecidas durante o desenvolvimento
-tests/                 Testes de lógica e regressão com Node
-.github/workflows/     Verificação automática no GitHub Actions
 ```
 
-`assets/shaders/` fica reservada para uso futuro e não é carregada pelo jogo-base.
+O código do céu e das poças está em `src/sky.js` e `src/puddles.js`.
 Shaders do exemplo de água pertencem ao próprio pacote.
 
-## Testes e contribuição
+## Validação e contribuição
 
-Para desenvolvimento/testes, use **Node.js 24+**:
+**Os arquivos de testes são mantidos somente no ambiente local de desenvolvimento.**
+Não fazem parte desta distribuição e estão ignorados no Git. Não é necessário
+instalar ferramentas de teste para jogar. A versão 0.3.0 foi conferida localmente
+com 77 casos de lógica e validada visualmente pelo usuário no aparelho antes da
+publicação; isso não garante o mesmo desempenho em todas as GPUs/navegadores.
 
-```sh
-npm test
-```
-
-A suíte atual tem **45 testes** de geração, física, árvores, biomas, malhas,
-importação manual/ZIP, eventos, kill, paletas de save e regressões de água e folhas.
-Não instala navegador nem depende de frameworks de teste externos.
-
-A CI executa os testes no Node 24 e verifica a sintaxe JS/Python. A validação visual
-WebGL, o seletor de arquivos e o Service Worker precisam ser conferidos em um
-navegador real; os testes de lógica não substituem essa verificação.
-
-Para relatar bugs e propor alterações, veja [CONTRIBUTING.md](CONTRIBUTING.md).
+A CI antiga de testes foi removida para não depender de arquivos que não são mais
+publicados. Para contribuir, veja [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## Licença
 

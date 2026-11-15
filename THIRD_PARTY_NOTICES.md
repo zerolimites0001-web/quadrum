@@ -25,6 +25,10 @@ de redistribuir ou publicar uma versão derivada:
 - https://www.minecraft.net/eula
 - https://www.minecraft.net/usage-guidelines
 
+`assets/textures/SOURCE-construction-sky.txt` registra as texturas oficiais adicionais
+das portas, materiais de construção e `environment/moon_phases.png`. Escadas e lajes
+reutilizam as texturas dos materiais correspondentes.
+
 `assets/textures/SOURCE-minecraft-water.txt` registra especificamente a origem das
 texturas `water_still.png` e `water_flow.png`.
 

@@ -1,0 +1,9 @@
+{
+  "uuid": "91cd7144-a414-4d49-a1a3-8610b6639bf1",
+  "name": "Água realista · teste da API",
+  "description": "Ondas por vértice, pequenas ondulações, Fresnel e reflexo planar real da cena. Resolução móvel 256px; reflexos limitados a 8 FPS. Não altera blocos nem saves. Desativar restaura a água original.",
+  "version": "1.0.0",
+  "apiVersion": 1,
+  "files": {"js": ["water.js"], "css": ["ui/menu.css"], "html": ["ui/menu.html"]},
+  "assets": {"vertex": "shaders/water.vert", "fragment": "shaders/water.frag"}
+}

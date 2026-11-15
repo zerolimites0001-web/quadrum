@@ -1,0 +1,42 @@
+/* Kill automático cooperativo + rastreamento de APIs do navegador.
+ * Não é sandbox: nenhum JS na mesma thread pode interromper while(true), desfazer
+ * toda mutação arbitrária ou identificar recursos escondidos fora destas APIs.
+ */
+import * as THREE from '../vendor/three.module.js';
+let current=null,installed=false,muted=0;
+const scopes=[];
+function owner(){if(current)return current;if(muted||!scopes.length)return null;const stack=new Error().stack||'';let best=null,score=0;for(let i=scopes.length-1;i>=0;i--){const s=scopes[i];for(const source of s.sources)if(source.length>score&&stack.includes(source)){best=s;score=source.length;}}return best;}
+function resources(object,set){object?.traverse?.(o=>{if(o.geometry)set.add(o.geometry);for(const m of Array.isArray(o.material)?o.material:[o.material])if(m){set.add(m);for(const value of Object.values(m))if(value?.isTexture)set.add(value);for(const u of Object.values(m.uniforms||{}))if(u?.value?.isTexture)set.add(u.value);}});}
+export function withoutTracking(fn){const previous=current;current=null;muted++;try{const result=fn();if(result?.finally)return result.finally(()=>muted--);muted--;return result;}catch(e){muted--;throw e;}finally{current=previous;}}
+export class KillScope {
+ constructor(game,manifest){this.game=game;this.name=manifest.name;this.active=true;this.cleanups=new Set();this.objects=new Set();this.events=new Set();this.baseline=new Set();this.protectedResources=new Set();this.aborted=new Promise((_,reject)=>{this.reject=reject;});this.aborted.catch(()=>{});this.sources=[...(manifest.files?.js||[])];if(manifest.url?.endsWith('pack.json'))this.sources.push(manifest.baseURL);scopes.push(this);this.capture();}
+ capture(){const scene=this.game.scene;if(scene&&!this.captured){scene.traverse(o=>this.baseline.add(o));resources(scene,this.protectedResources);if(this.game.textures?.texture)this.protectedResources.add(this.game.textures.texture);this.captured=true;}}
+ run(fn,...args){if(!this.active)return;this.capture();const previous=current;current=this;try{return fn(...args);}finally{current=previous;}}
+ wait(promise){return Promise.race([promise,this.aborted]);}
+ track(fn){if(!this.active){fn();return()=>{};}this.cleanups.add(fn);return()=>this.cleanups.delete(fn);}
+ kill(){if(!this.active)return;this.active=false;this.reject(new DOMException('Mod desativado','AbortError'));for(const cleanup of [...this.cleanups].reverse())try{cleanup();}catch(e){console.warn('kill.js:',this.name,e);}this.cleanups.clear();this.events.clear();
+  const owned=new Set();for(const object of this.objects)resources(object,owned);for(const object of this.objects)if(!this.baseline.has(object))object.removeFromParent();for(const resource of owned)if(!this.protectedResources.has(resource))try{resource.dispose?.();}catch{}this.objects.clear();this.baseline.clear();this.protectedResources.clear();
+ }
+}
+export function installKillHooks(){if(installed)return;installed=true;
+ // Callbacks propagam a identidade do mod, inclusive quando ele não usa a API.
+ for(const [set,clear,repeating] of [['setTimeout','clearTimeout',false],['setInterval','clearInterval',true],['requestAnimationFrame','cancelAnimationFrame',false]]){
+  if(!globalThis[set])continue;const nativeSet=globalThis[set].bind(globalThis),nativeClear=globalThis[clear].bind(globalThis);
+  globalThis[set]=function(callback,...args){const scope=owner();if(!scope)return nativeSet(callback,...args);if(!scope.active)return-1;if(typeof callback!=='function')throw new Error('Mods devem usar funções nos timers, não strings.');let forget=()=>{};const id=nativeSet((...values)=>{if(!repeating)forget();return scope.run(callback,...values);},...args);forget=scope.track(()=>nativeClear(id));return id;};
+ }
+ if(globalThis.queueMicrotask){const native=globalThis.queueMicrotask.bind(globalThis);globalThis.queueMicrotask=fn=>{const scope=owner();return native(scope?()=>scope.run(fn):fn);};}
+ if(globalThis.EventTarget){const proto=EventTarget.prototype,add=proto.addEventListener,remove=proto.removeEventListener;
+  proto.addEventListener=function(type,listener,options){const scope=owner();if(!scope||!listener)return add.call(this,type,listener,options);if(!scope.active)return;const capture=typeof options==='boolean'?options:!!options?.capture;const duplicate=[...scope.events].find(e=>e.target===this&&e.type===type&&e.listener===listener&&e.capture===capture);if(duplicate)return add.call(this,type,duplicate.wrapped,options);
+   const target=this,entry={target,type,listener,capture,wrapped:null,forget:()=>{}};entry.wrapped=function(event){if(options?.once){scope.events.delete(entry);entry.forget();}return scope.run(()=>typeof listener==='function'?listener.call(this,event):listener.handleEvent(event));};scope.events.add(entry);entry.forget=scope.track(()=>{remove.call(target,type,entry.wrapped,capture);scope.events.delete(entry);});return add.call(this,type,entry.wrapped,options);
+  };
+  proto.removeEventListener=function(type,listener,options){const capture=typeof options==='boolean'?options:!!options?.capture;for(const scope of scopes)for(const e of scope.events)if(e.target===this&&e.type===type&&e.listener===listener&&e.capture===capture){scope.events.delete(e);e.forget();return remove.call(this,type,e.wrapped,options);}return remove.call(this,type,listener,options);};
+ }
+ if(globalThis.Node){for(const name of ['appendChild','insertBefore']){const native=Node.prototype[name];Node.prototype[name]=function(node,...args){const scope=owner();if(scope&&!scope.active)return node;const nodes=node.nodeType===11?[...node.childNodes]:[node],fresh=nodes.filter(n=>!n.isConnected);const result=native.call(this,node,...args);if(scope)for(const n of fresh)scope.track(()=>n.remove?.());return result;};}}
+ if(globalThis.Element)for(const proto of [Element.prototype,globalThis.DocumentFragment?.prototype,globalThis.Document?.prototype].filter(Boolean))for(const name of ['append','prepend','replaceChildren']){const native=proto[name];if(!native)continue;proto[name]=function(...nodes){const scope=owner();if(scope&&!scope.active)return;const fresh=nodes.filter(n=>typeof n!=='string'&&!n.isConnected);const result=native.apply(this,nodes);if(scope)for(const node of fresh)scope.track(()=>node.remove?.());return result;};}
+ const addObject=THREE.Object3D.prototype.add;THREE.Object3D.prototype.add=function(...objects){const scope=owner();if(scope&&!scope.active)return this;const result=addObject.apply(this,objects);if(scope)for(const object of objects)if(!scope.baseline.has(object)&&object!==scope.game.scene&&object!==scope.game.camera&&object!==scope.game.outline)scope.objects.add(object);return result;};
+ const removeObject=THREE.Object3D.prototype.remove;THREE.Object3D.prototype.remove=function(...objects){for(const object of objects)for(const scope of scopes)scope.objects.delete(object);return removeObject.apply(this,objects);};
+ for(const name of ['MutationObserver','ResizeObserver','IntersectionObserver']){const Native=globalThis[name];if(!Native)continue;globalThis[name]=class extends Native{constructor(callback,...args){const scope=owner();super(scope?(...values)=>scope.run(callback,...values):callback,...args);if(scope)scope.track(()=>this.disconnect());}};}
+ if(globalThis.fetch){const native=globalThis.fetch.bind(globalThis);globalThis.fetch=function(input,options={}){const scope=owner();if(!scope)return native(input,options);if(!scope.active)return Promise.reject(new DOMException('Mod desativado','AbortError'));const controller=new AbortController(),original=options.signal||(input instanceof Request?input.signal:null);let signal=controller.signal;if(original){if(AbortSignal.any)signal=AbortSignal.any([original,signal]);else{if(original.aborted)controller.abort();else original.addEventListener('abort',()=>controller.abort(),{once:true});}}scope.track(()=>controller.abort());return native(input,{...options,signal});};}
+ if(globalThis.HTMLMediaElement){const play=HTMLMediaElement.prototype.play;HTMLMediaElement.prototype.play=function(...args){const scope=owner();if(scope){if(!scope.active)return Promise.resolve();scope.track(()=>{this.pause();this.removeAttribute('src');this.load();});}return play.apply(this,args);};}
+ if(globalThis.AudioNode){const connect=AudioNode.prototype.connect;AudioNode.prototype.connect=function(...args){const scope=owner();if(scope){if(!scope.active)return args[0];scope.track(()=>{try{this.stop?.();this.disconnect();}catch{}});}return connect.apply(this,args);};}
+}

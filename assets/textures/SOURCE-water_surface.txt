@@ -1,0 +1,5 @@
+Texture: water_surface.jpg
+Source: https://commons.wikimedia.org/wiki/File:Ocean_ripple.jpg
+Author: Matt Hardy
+License: CC0 1.0 (Public Domain Dedication)
+Original image: 6000 x 4000; cropped to a 1900 x 1900 water-only texture for the game.

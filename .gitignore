@@ -1,0 +1,19 @@
+# Arquivos gerados e dependências locais
+node_modules/
+__pycache__/
+*.py[cod]
+*.log
+*.pid
+.DS_Store
+Thumbs.db
+
+# Credenciais e configurações privadas
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+
+# Backups pessoais de mundos, se copiados para o projeto
+/backups/
+/saves/

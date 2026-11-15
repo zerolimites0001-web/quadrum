@@ -1,0 +1,5 @@
+Texturas de água oficiais do Minecraft Bedrock Samples:
+- water_still.png (32 quadros de animação)
+- water_flow.png (32 quadros de animação)
+Origem: https://github.com/Mojang/bedrock-samples/tree/main/resource_pack/textures/blocks
+As texturas são recursos de Minecraft/Mojang; consulte os termos oficiais antes de redistribuir o jogo.

@@ -5,6 +5,12 @@
 O jogo **não procura nem lê pastas do aparelho**. O usuário seleciona um ZIP,
 uma pasta ou arquivos pelo seletor do navegador. Nada é executado até **Ativar**.
 A cópia importada fica no IndexedDB, não vinculada ao arquivo original.
+
+Pacotes recém-importados (inclusive atualizações) ficam desativados por padrão.
+Ativar/desativar grava uma preferência por UUID nos metadados do IndexedDB.
+Ao reabrir o site, o engine restaura essa escolha; um erro temporário de ativação
+não a apaga. Dados antigos baseados apenas em localStorage são migrados sem
+reimportar os arquivos. A origem/perfil do navegador continua delimitando o save.
 Para atualizar um pacote, importe a nova versão com o mesmo UUID.
 
 Exemplos completos estão em [examples/mods/](examples/mods/):

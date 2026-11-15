@@ -10,7 +10,7 @@ Jogue direto no navegador, sem instalar. Os mundos ficam salvos no navegador
 desse endereço; use a exportação de mundos para fazer backups ou transferi-los.
 
 [![Testes](https://github.com/zerolimites0001-web/quadrum/actions/workflows/tests.yml/badge.svg)](https://github.com/zerolimites0001-web/quadrum/actions/workflows/tests.yml)
-![Versão](https://img.shields.io/badge/vers%C3%A3o-0.2.1-77a75c)
+![Versão](https://img.shields.io/badge/vers%C3%A3o-0.2.2-77a75c)
 ![JavaScript](https://img.shields.io/badge/JavaScript-ES_modules-f7df1e)
 ![Three.js](https://img.shields.io/badge/Three.js-local-222222)
 [![Licença MIT](https://img.shields.io/badge/licen%C3%A7a-MIT-blue.svg)](LICENSE)
@@ -131,8 +131,8 @@ sair** para voltar ao menu. O jogo também salva automaticamente durante a sess�
 | Dados | Armazenamento |
 | --- | --- |
 | Mundos e edições | IndexedDB `quadrum-worlds` |
-| Arquivos de mods importados | IndexedDB `quadrum-imported-mods` |
-| Preferências e estado dos mods | localStorage |
+| Arquivos e estado de ativação dos mods | IndexedDB `quadrum-imported-mods` |
+| Preferências da interface e cache de compatibilidade | localStorage |
 
 **Os saves ficam no navegador, não no GitHub nem em uma conta online.** Use sempre
 o mesmo endereço, porta e perfil do navegador. Trocar de origem, limpar dados do
@@ -150,6 +150,12 @@ navegador ou testar mods. Dados pessoais e saves não fazem parte deste reposit�
 3. Selecione explicitamente o pacote no seletor do navegador.
 4. Confira a origem e confirme **Ativar**.
 5. Para desligar, volte à lista e toque em **Desativar**.
+
+**Pacotes novos e versões reimportadas começam desligados.** Depois que você
+ativa ou desativa um pacote, essa preferência é salva automaticamente junto aos
+metadados do mod no IndexedDB e restaurada ao reabrir a mesma origem. A lista
+mostra se a ativação está salva. Uma falha temporária de carregamento aparece
+como erro, mas não apaga a escolha anterior de ativá-lo.
 
 **Não existe varredura automática de pastas, importação por caminho/URL ou acesso
 genérico ao armazenamento do aparelho.** O loader recebe apenas os arquivos
@@ -253,7 +259,7 @@ Para desenvolvimento/testes, use **Node.js 24+**:
 npm test
 ```
 
-A suíte atual tem **35 testes** de geração, física, árvores, biomas, malhas,
+A suíte atual tem **45 testes** de geração, física, árvores, biomas, malhas,
 importação manual/ZIP, eventos, kill, paletas de save e regressões de água e folhas.
 Não instala navegador nem depende de frameworks de teste externos.
 

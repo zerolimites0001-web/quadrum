@@ -14,10 +14,15 @@ export class ModManager {
  subscribe(callback){this.listeners.add(callback);return()=>this.listeners.delete(callback);}
  error(error,context='mod'){console.error('[Quadrum mods]',context,error);this.game.ui.toast('Erro em '+context+': '+(error?.message||error));}
  persist(){try{localStorage.setItem('quadrum-enabled-mods',JSON.stringify([...this.enabledPrefs]));}catch(e){this.error(e,'preferências dos mods');}}
- record(pack){const url=new URL(encodeURIComponent(pack.uuid)+'/pack.json',MOD_BASE).href,manifest=normalizeManifest(pack.raw,url);return{manifest,imported:pack,status:'disabled',error:null,cleanups:[],blocks:[],items:[],api:null};}
+ record(pack){const url=new URL(encodeURIComponent(pack.uuid)+'/pack.json',MOD_BASE).href,manifest=normalizeManifest(pack.raw,url);return{manifest,imported:pack,enabled:typeof pack.enabled==='boolean'?pack.enabled:this.enabledPrefs.has(manifest.uuid),status:'disabled',error:null,cleanups:[],blocks:[],items:[],api:null};}
  async importFiles(files){const pack=await this.store.prepare([...files]);const existing=this.records.get(pack.uuid);if(existing){if(!confirm('Atualizar o pacote '+existing.manifest.name+' com os arquivos selecionados?'))return null;await this.disable(pack.uuid);}await this.store.put(pack);const record=this.record(pack);this.records.set(pack.uuid,record);this.changed();return record;}
  async remove(id){await this.disable(id);await this.store.remove(id);this.records.delete(id);this.enabledPrefs.delete(id);this.persist();this.changed();}
- async boot(){if(this.booted)return;try{for(const pack of await this.store.list())try{const record=this.record(pack);this.records.set(record.manifest.uuid,record);}catch(e){this.error(e,'pacote importado');}for(const id of [...this.enabledPrefs]){const record=this.records.get(id);if(record)try{await this.enable(id,[]);}catch(e){this.error(e,record.manifest.name);}}}catch(e){console.warn('Mods indisponíveis:',e);}this.booted=true;this.changed();}
+ async saveEnabled(record,enabled){await this.store.setEnabled(record.manifest.uuid,enabled);record.enabled=!!enabled;if(record.imported)record.imported.enabled=!!enabled;if(enabled)this.enabledPrefs.add(record.manifest.uuid);else this.enabledPrefs.delete(record.manifest.uuid);this.persist();}
+ async boot(){if(this.booted)return;try{const packs=await this.store.list();for(const pack of packs)try{const record=this.record(pack);this.records.set(record.manifest.uuid,record);if(typeof pack.enabled!=='boolean')await this.store.setEnabled(record.manifest.uuid,record.enabled);}catch(e){this.error(e,'pacote importado');}
+  this.enabledPrefs=new Set([...this.records.values()].filter(r=>r.enabled).map(r=>r.manifest.uuid));this.persist();
+  for(const record of this.records.values())if(record.enabled)try{await this.enable(record.manifest.uuid,[]);}catch(e){record.status='error';record.error='Falha ao restaurar a ativação salva: '+e.message;this.error(e,record.manifest.name+' (ativação salva; nova tentativa ao reabrir)');}
+ }catch(e){console.warn('Mods indisponíveis:',e);}this.booted=true;this.changed();}
+
 
  async enable(id,stack=[]){if([...this.records.values()].some(r=>r.status==='loading'))throw new Error('Aguarde o carregamento do outro mod.');const r=this.records.get(id);if(!r)throw new Error('Mod não encontrado: '+id);if(r.status==='active')return r.api;if(stack.includes(id))throw new Error('Dependência circular: '+[...stack,id].join(' → '));if(r.status==='loading')throw new Error('Mod já está carregando.');
   await this.store.bridge();for(const dep of r.manifest.dependencies){if(!this.records.has(dep))throw new Error('Dependência ausente: '+dep);await this.enable(dep,[...stack,id]);}
@@ -26,11 +31,15 @@ export class ModManager {
    for(const href of r.manifest.files.css)await scope.wait(r.api.ui.style(href));
    for(const href of r.manifest.files.html)await scope.wait(r.api.ui.mount(href));
    for(const src of r.manifest.files.js){const moduleURL=new URL(src);moduleURL.searchParams.set('quadrumActivation',String((r.activations=(r.activations||0)+1)));const module=await scope.wait(import(moduleURL.href));const activate=module.activate||module.default;if(activate!==undefined&&typeof activate!=='function')throw new Error('default/activate precisa ser uma função.');if(activate){const cleanup=await scope.wait(scope.run(activate,r.api));if(typeof cleanup==='function')r.cleanups.push(cleanup);}if(typeof module.deactivate==='function')r.cleanups.push(()=>module.deactivate(r.api));}
-   await scope.wait(this.refreshContent());if(!scope.active)throw new DOMException('Mod desativado','AbortError');r.status='active';this.enabledPrefs.add(id);this.persist();this.bus.emit('modLoaded',{id,api:r.api});return r.api;
-  }catch(e){if(r.scope===scope){await this.cleanup(r);r.status=e.name==='AbortError'?'disabled':'error';r.error=e.name==='AbortError'?null:e.message;this.enabledPrefs.delete(id);this.persist();await this.refreshContent();}throw e;}
+   await scope.wait(this.refreshContent());if(!scope.active)throw new DOMException('Mod desativado','AbortError');await scope.wait(this.saveEnabled(r,true));r.status='active';this.bus.emit('modLoaded',{id,api:r.api});return r.api;
+  }catch(e){if(r.scope===scope){await this.cleanup(r);r.status=e.name==='AbortError'?'disabled':'error';r.error=e.name==='AbortError'?null:e.message;if(r.enabled)this.enabledPrefs.add(id);else this.enabledPrefs.delete(id);this.persist();await this.refreshContent();}throw e;}
   finally{window.Quadrum.current=null;this.changed();}
  }
- async disable(id){const r=this.records.get(id);if(!r)return;const dependent=[...this.records.values()].find(other=>other.status==='active'&&other.manifest.dependencies.includes(id));if(dependent)throw new Error('Desative primeiro '+dependent.manifest.name);await this.cleanup(r);r.status='disabled';this.enabledPrefs.delete(id);this.persist();await this.refreshContent();this.bus.emit('modUnloaded',{id});if(this.game.running)this.game.render();this.changed();}
+ async disable(id){const r=this.records.get(id);if(!r)return;const dependent=[...this.records.values()].find(other=>other.status==='active'&&other.manifest.dependencies.includes(id));if(dependent)throw new Error('Desative primeiro '+dependent.manifest.name);
+  r.scope?.kill();let stateError=null;try{await this.saveEnabled(r,false);}catch(e){stateError=e;}
+  await this.cleanup(r);r.status='disabled';await this.refreshContent();this.bus.emit('modUnloaded',{id});if(this.game.running)this.game.render();this.changed();if(stateError)throw new Error('Mod desligado nesta página, mas não foi possível salvar a preferência: '+stateError.message);
+ }
+
  cleanup(r){if(r.cleaning)return r.cleaning;const scope=r.scope;r.scope?.kill();this.releaseScopeOverrides(scope);const callbacks=r.cleanups.splice(0),blockIds=r.blocks.splice(0),itemIds=r.items.splice(0);const task=(async()=>{
   for(const fn of callbacks.reverse())try{await fn();}catch(e){this.error(e,r.manifest.name+' / limpeza');}
   for(const id of blockIds){const block=BLOCKS[id],key=block.key,namespace=block.namespace;for(const k of Object.keys(block))delete block[k];Object.assign(block,{id,key,namespace,name:'Bloco ausente · '+key,category:'Mods',texture:'generated:missing:'+key,color:'#db39c8',solid:true,transparent:false,missing:true,hidden:true});}

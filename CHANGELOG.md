@@ -1,5 +1,17 @@
 # Histórico
 
+## 0.2.2
+
+- Ativação/desativação de mods persistida por pacote no IndexedDB, com migração
+  da preferência antiga em localStorage.
+- Pacotes novos e reimportados continuam desativados por padrão, mesmo que o
+  manifesto declare enabled ou haja um cache antigo com o mesmo UUID.
+- Falhas temporárias ao restaurar não apagam a ativação desejada; a interface
+  mostra o erro e mantém a preferência para a próxima abertura.
+- A lista de mods indica o estado salvo; não exige um botão Salvar separado.
+- Interromper uma ativação pendente encerra seu escopo antes de salvar desativado.
+- Dez testes adicionais de persistência/reativação: 45 testes de lógica no total.
+
 ## 0.2.1
 
 ### Correções

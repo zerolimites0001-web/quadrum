@@ -35,6 +35,16 @@ As imagens de referência ficam fora da distribuição.
 
 **[▶ Abrir Quadrum — quadrum-chi.vercel.app](https://quadrum-chi.vercel.app/)**
 
+**[▶ GitHub Pages — zerolimites0001-web.github.io/quadrum](https://zerolimites0001-web.github.io/quadrum/)**
+
+**[📦 Releases e ZIP do jogo](https://github.com/zerolimites0001-web/quadrum/releases)**
+
+Cada endereço mantém seus próprios saves no navegador. Para levar um mundo da
+Vercel ao GitHub Pages, exporte o backup em um e importe no outro.
+
+O Pages é atualizado automaticamente a cada push na `main`, publicando somente os
+arquivos públicos do jogo; testes e referências visuais pessoais não são enviados.
+
 Jogue direto no navegador, sem instalar. Os mundos ficam salvos no navegador
 desse endereço; use a exportação de mundos para fazer backups ou transferi-los.
 

@@ -5,7 +5,7 @@ import {Puddles} from './puddles.js';
 import {hash2} from './noise.js';
 import {createSky} from './sky.js';
 export class Environment{
- constructor(game){this.game=game;this.scene=game.scene;this.state=null;this.weather='clear';this.particlesEnabled=true;this.puddlesEnabled=true;this.reflections=true;this.group=new T.Group();this.group.name='Quadrum sky';this.scene.add(this.group);this.light=this.scene.children.find(o=>o.isDirectionalLight);this.hemi=this.scene.children.find(o=>o.isHemisphereLight);this.direction=new T.Vector3();this.color=new T.Color();
+ constructor(game){this.game=game;this.scene=game.scene;this.state=null;this.weather='clear';this.particlesEnabled=true;this.puddlesEnabled=true;this.reflections=true;this.group=new T.Group();this.group.name='LAB sky';this.scene.add(this.group);this.light=this.scene.children.find(o=>o.isDirectionalLight);this.hemi=this.scene.children.find(o=>o.isHemisphereLight);this.direction=new T.Vector3();this.color=new T.Color();
   this.skyUniforms={uTop:{value:new T.Color()},uHorizon:{value:new T.Color()},uCloud:{value:.2},uTime:{value:0},uDay:{value:1}};
   this.sky=createSky(this.skyUniforms);this.group.add(this.sky);
   const canvas=document.createElement('canvas');canvas.width=canvas.height=192;const c=canvas.getContext('2d'),gradient=c.createRadialGradient(96,96,0,96,96,96);gradient.addColorStop(0,'rgba(255,252,225,1)');gradient.addColorStop(.19,'rgba(255,251,220,1)');gradient.addColorStop(.23,'rgba(255,238,175,.94)');gradient.addColorStop(.30,'rgba(255,215,135,.24)');gradient.addColorStop(.60,'rgba(255,205,120,.045)');gradient.addColorStop(1,'rgba(255,205,120,0)');c.fillStyle=gradient;c.fillRect(0,0,192,192);this.sunTexture=new T.CanvasTexture(canvas);this.sunTexture.colorSpace=T.SRGBColorSpace;

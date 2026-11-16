@@ -22,3 +22,13 @@ body.hud-editing #touch-controls{display:block!important}body.hud-editing #hud{d
 .hud-layout-custom #block-label{white-space:nowrap}
 
 .hud-json-actions{display:flex;gap:7px;margin-top:8px}.hud-json-actions button{flex:1;min-width:0}#hud-edit-import-file{display:none!important}
+
+/* Minimapa local: canvas próprio, sob os botões do topo. Não cobre a mira. */
+#minimap{position:absolute;top:max(62px,calc(env(safe-area-inset-top) + 52px));right:max(12px,env(safe-area-inset-right));display:flex;flex-direction:column;align-items:flex-end;gap:5px;pointer-events:none;z-index:1}
+#minimap-toggle{pointer-events:auto;font-size:18px;width:40px;height:36px;min-height:0;padding:2px;background:#4449}
+#minimap-toggle.active{border-color:#c5ed7e;color:#d1f69e}
+#minimap-canvas{display:block;width:128px;height:128px;image-rendering:pixelated;border:2px solid #77796e;box-shadow:0 0 0 2px #111,0 2px 4px #0008;background:#1d2b30}
+@media(max-height:550px){#minimap-canvas{width:88px;height:88px}}
+#minimap[hidden]{display:none!important}
+
+#minimap-canvas[hidden]{display:none!important}

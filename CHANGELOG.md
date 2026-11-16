@@ -1,5 +1,13 @@
 # Histórico
 
+## 0.3.4
+
+- Partículas com a textura do bloco ao colocar/quebrar, incluindo portas e lajes.
+- Minimapa com orientação do jogador, atualização por chunks e botão liga/desliga.
+- Vilas procedurais com casas, caminhos, poço e horta em mundos novos.
+- Geração anterior preservada para saves legados.
+- Lab aprovado no navegador pelo usuário; testes mantidos apenas localmente.
+
 ## 0.3.3
 
 - Mão voxel em primeira pessoa, com animações distintas de quebra, colocação e uso.

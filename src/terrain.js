@@ -1,6 +1,8 @@
 import {Perlin,hashSeed,hash2} from './noise.js';
-import {ID} from './blocks.js';
-export const CHUNK=16, HEIGHT=96, SEA=29;
+import {ID,getBlock} from './blocks.js';
+import {validateGenerator,flatIds,WORLD_HEIGHT} from './world-options.js';
+import {VillageGenerator} from './villages.js';
+export const CHUNK=16, HEIGHT=WORLD_HEIGHT, SEA=29;
 export const index=(x,y,z)=>x+z*CHUNK+y*CHUNK*CHUNK;
 export const chunkKey=(cx,cz)=>cx+','+cz;
 export const TREE_TYPES={
@@ -15,8 +17,10 @@ export const TREE_TYPES={
  azalea:{trunk:'oak_log',leaves:'azalea_leaves',height:4,variation:2},
 };
 export class Terrain {
- constructor(seed){this.seed=hashSeed(seed);this.noise=new Perlin(seed);this.climate=new Perlin(seed+':biomes');}
- column(x,z){
+ constructor(seed,options){this.seed=hashSeed(seed);this.options=validateGenerator(options,{legacy:true});this.noise=new Perlin(seed);this.climate=new Perlin(seed+':biomes');this.flat=this.options.type==='flat'?flatIds(this.options):null;this.villages=new VillageGenerator(seed,this.options,(x,z)=>this.baseColumn(x,z));}
+ column(x,z){return this.villages.surface(x,z,this.baseColumn(x,z));}
+ baseColumn(x,z){
+  if(this.flat){const h=this.flat.length-1;return{h,biome:'Planícies',sandy:false,snow:false,top:this.flat[h],fill:this.flat[Math.max(0,h-1)],tree:null,density:0,flora:'meadow',temperature:0,humidity:0};}
   const n=this.noise,continental=n.fbm(x*.0035,z*.0035,3),hills=n.fbm(x*.018,z*.018,4),ridge=1-Math.abs(n.fbm(x*.008+180,z*.008-120,3));
   const mountain=Math.max(0,this.climate.noise(x*.004+50,z*.004+50)-.04)*45*ridge;
   // A altura original foi preservada: só superfícies, flora e árvores mudaram.
@@ -73,6 +77,7 @@ export class Terrain {
   if(type==='mangrove')for(const [dx,dz] of [[1,0],[-1,0],[0,1],[0,-1]]){put(x+dx,y+1,z+dz,trunk);put(x+dx*2,y,z+dz*2,trunk);}
  }
  generate(cx,cz){
+  if(this.flat){const data=new Uint16Array(16*16*HEIGHT);for(let y=0;y<this.flat.length;y++)data.fill(this.flat[y],y*256,(y+1)*256);this.villages.apply(cx,cz,data,index);return data;}
   const data=new Uint16Array(CHUNK*CHUNK*HEIGHT),ox=cx*CHUNK,oz=cz*CHUNK,columns=[];
   for(let z=0;z<16;z++)for(let x=0;x<16;x++){
    const wx=ox+x,wz=oz+z,c=this.column(wx,wz);columns[x+z*16]=c;
@@ -88,9 +93,9 @@ export class Terrain {
   for(let z=oz-4;z<oz+20;z++)for(let x=ox-4;x<ox+20;x++){const tree=this.treeAt(x,z);if(tree)this.treeBlocks(tree,put);}
   const meadow=['rose','dandelion','cornflower','daisy','allium','lily','tulip_red','tulip_white','tulip_orange','tulip_pink','orchid','torchflower'];
   for(let z=0;z<16;z++)for(let x=0;x<16;x++){
-   const c=columns[x+z*16];if(c.h<=SEA||c.sandy||c.snow||!c.tree)continue;const i=index(x,c.h+1,z);if(data[i])continue;
+   const c=columns[x+z*16];if(c.h<=SEA||c.sandy||c.snow||!c.tree||c.village)continue;const i=index(x,c.h+1,z);if(data[i])continue;
    const r=hash2(ox+x,oz+z,this.seed+124),flowers=c.flora==='flowers';if(r>(flowers?.77:.95)){const select=Math.floor(hash2(ox+x,oz+z,this.seed+728)*meadow.length);data[i]=r>(flowers?.80:.983)?ID[meadow[select]]:ID.tallgrass;}
-  }return data;
+  }this.villages.apply(cx,cz,data,index);return data;
  }
- spawn(){for(let r=0;r<96;r+=4)for(let z=-r;z<=r;z+=4)for(let x=-r;x<=r;x+=4){const c=this.column(x,z);if(c.h>SEA+2&&c.h<54&&!c.sandy)return{x:x+.5,y:c.h+2.1,z:z+.5};}return{x:.5,y:this.column(0,0).h+3,z:.5};}
+ spawn(){if(this.options.villages){const village=this.villages.nearest(0,0,1);if(village)return{x:village.x+.5,y:village.level+2.1,z:village.z+6.5};}if(this.flat)return{x:.5,y:this.flat.length+1.1,z:.5};for(let r=0;r<96;r+=4)for(let z=-r;z<=r;z+=4)for(let x=-r;x<=r;x+=4){const c=this.column(x,z);if(c.h>SEA+2&&c.h<54&&!c.sandy)return{x:x+.5,y:c.h+2.1,z:z+.5};}return{x:.5,y:this.column(0,0).h+3,z:.5};}
 }

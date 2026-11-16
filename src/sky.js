@@ -30,6 +30,6 @@ void main(){
 }`;
 export function createSky(uniforms){const noise=new T.DataTexture(cloudNoiseData(),128,128,T.RGBAFormat,T.UnsignedByteType);noise.wrapS=noise.wrapT=T.RepeatWrapping;noise.magFilter=T.LinearFilter;noise.minFilter=T.LinearMipmapLinearFilter;noise.generateMipmaps=true;noise.needsUpdate=true;
  Object.assign(uniforms,{uNoise:{value:noise},uInvProjection:{value:new T.Matrix4()},uViewRotation:{value:new T.Matrix3()}});
- const material=new T.ShaderMaterial({uniforms,vertexShader:SKY_VERTEX,fragmentShader:SKY_FRAGMENT,depthWrite:false,depthTest:false,toneMapped:false,precision:'highp'}),mesh=new T.Mesh(new T.PlaneGeometry(2,2),material);mesh.name='Quadrum fullscreen sky';mesh.renderOrder=-1000;mesh.frustumCulled=false;
+ const material=new T.ShaderMaterial({uniforms,vertexShader:SKY_VERTEX,fragmentShader:SKY_FRAGMENT,depthWrite:false,depthTest:false,toneMapped:false,precision:'highp'}),mesh=new T.Mesh(new T.PlaneGeometry(2,2),material);mesh.name='LAB fullscreen sky';mesh.renderOrder=-1000;mesh.frustumCulled=false;
  mesh.onBeforeRender=(_renderer,_scene,camera)=>{uniforms.uInvProjection.value.copy(camera.projectionMatrixInverse);uniforms.uViewRotation.value.setFromMatrix4(camera.matrixWorld);material.uniformsNeedUpdate=true;};return mesh;
 }

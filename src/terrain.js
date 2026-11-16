@@ -2,6 +2,7 @@ import {Perlin,hashSeed,hash2} from './noise.js';
 import {ID,getBlock} from './blocks.js';
 import {validateGenerator,flatIds,WORLD_HEIGHT} from './world-options.js';
 import {VillageGenerator} from './villages.js';
+import {modernTreeBlocks,MODERN_TREE_SPECS,TREE_REACH,MAX_TREE_SPACING,treeSpacing} from './trees.js';
 export const CHUNK=16, HEIGHT=WORLD_HEIGHT, SEA=29;
 export const index=(x,y,z)=>x+z*CHUNK+y*CHUNK*CHUNK;
 export const chunkKey=(cx,cz)=>cx+','+cz;
@@ -53,13 +54,23 @@ export class Terrain {
  treeAt(x,z){
   const r=hash2(x,z,this.seed+73);if(r<.92)return null;const c=this.column(x,z);
   if(!c.tree||r<1-c.density)return null;
-  for(let dz=-2;dz<=2;dz++)for(let dx=-2;dx<=2;dx++)if((dx||dz)&&hash2(x+dx,z+dz,this.seed+73)>r)return null;
-  // Espécie NÃO depende mais da probabilidade usada para escolher uma raiz.
+  // Espécie NÃO depende da probabilidade usada para escolher uma raiz.
   let type=c.tree;if(c.biome==='Floresta'&&hash2(x,z,this.seed+829)>.84)type='birch';
-  const spec=TREE_TYPES[type],height=spec.height+Math.floor(hash2(x,z,this.seed+3)*spec.variation);
+  if(this.options.version>=3){
+   const gap=treeSpacing(type,x,z,this.seed);
+   for(let dz=-MAX_TREE_SPACING;dz<=MAX_TREE_SPACING;dz++)for(let dx=-MAX_TREE_SPACING;dx<=MAX_TREE_SPACING;dx++){
+    const d2=dx*dx+dz*dz;if(!d2||d2>=MAX_TREE_SPACING**2)continue;
+    const nx=x+dx,nz=z+dz,priority=hash2(nx,nz,this.seed+73);if(priority<=r)continue;
+    const neighbor=this.column(nx,nz);if(!neighbor.tree||priority<1-neighbor.density)continue;
+    const species=neighbor.biome==='Floresta'&&hash2(nx,nz,this.seed+829)>.84?'birch':neighbor.tree;
+    if(d2<Math.max(gap,treeSpacing(species,nx,nz,this.seed))**2)return null;
+   }
+  }else for(let dz=-2;dz<=2;dz++)for(let dx=-2;dx<=2;dx++)if((dx||dz)&&hash2(x+dx,z+dz,this.seed+73)>r)return null;
+  const spec=this.options.version>=3?{...TREE_TYPES[type],...MODERN_TREE_SPECS[type]}:TREE_TYPES[type],height=spec.height+Math.floor(hash2(x,z,this.seed+3)*spec.variation);
   return{x,z,y:c.h,type,height,trunk:ID[spec.trunk],leaves:ID[spec.leaves]};
  }
  treeBlocks(tree,put){
+  if(this.options.version>=3)return modernTreeBlocks(tree,put,this.seed);
   const {x,z,y,type,height:h,trunk,leaves}=tree;
   for(let dy=1;dy<=h;dy++)put(x,y+dy,z,trunk);
   if(type==='spruce'){
@@ -90,7 +101,7 @@ export class Terrain {
    }
   }
   const put=(wx,y,wz,b,onlyAir=false)=>{const x=wx-ox,z=wz-oz;if(x<0||x>=16||z<0||z>=16||y<0||y>=HEIGHT)return;const i=index(x,y,z);if(!onlyAir||data[i]===0)data[i]=b;};
-  for(let z=oz-4;z<oz+20;z++)for(let x=ox-4;x<ox+20;x++){const tree=this.treeAt(x,z);if(tree)this.treeBlocks(tree,put);}
+  const reach=this.options.version>=3?TREE_REACH:4;for(let z=oz-reach;z<oz+16+reach;z++)for(let x=ox-reach;x<ox+16+reach;x++){const tree=this.treeAt(x,z);if(tree)this.treeBlocks(tree,put);}
   const meadow=['rose','dandelion','cornflower','daisy','allium','lily','tulip_red','tulip_white','tulip_orange','tulip_pink','orchid','torchflower'];
   for(let z=0;z<16;z++)for(let x=0;x<16;x++){
    const c=columns[x+z*16];if(c.h<=SEA||c.sandy||c.snow||!c.tree||c.village)continue;const i=index(x,c.h+1,z);if(data[i])continue;

@@ -130,3 +130,8 @@ for(const [key,name] of materials.slice(0,9)){
  for(const state of ['closed','open'])for(const part of ['lower','upper'])for(const id of variants[state][part]){const b=BLOCKS[id];Object.assign(b,{variants,inventoryId:base,mateId:variants[state][part==='lower'?'upper':'lower'][b.facing],toggleId:variants[state==='open'?'closed':'open'][part][b.facing]});}
  ARCHITECTURE.push(base);
 }
+
+// LAB: folhas recortadas disponíveis localmente, sem preencher os vazios com preto.
+BLOCKS[ID.cherry_leaves].texture='cherry_leaves';
+BLOCKS[ID.azalea_leaves].texture='azalea_leaves';
+for(const [species,tint] of [['spruce','#91b3ac'],['birch','#dfedb0'],['jungle','#b4e391'],['acacia','#d4d4a1']])BLOCKS[ID[species+'_leaves']].tint=tint;

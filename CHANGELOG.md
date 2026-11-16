@@ -1,5 +1,15 @@
 # Histórico
 
+## 0.3.6
+
+- Iluminação de preenchimento mais clara ao amanhecer/entardecer e durante a noite.
+- Sol direcional mais forte e sombras locais opcionais 512px com atualização limitada.
+- Removido o escurecimento artificial por altitude nas faces dos chunks.
+- Gerador v3: nove formatos de árvore, cerejeiras bifurcadas e separação variável de troncos.
+- Geração de árvores v1/v2 preservada para saves antigos; folhas rosas/azaleia recortadas.
+- Editor de HUD permite ocultar/reabrir ajustes sem perder o rascunho.
+- Mudanças promovidas do LAB a pedido do usuário; testes e referências visuais não distribuídos.
+
 ## 0.3.5
 
 - API central de painéis de mods (`api.ui.panel`) preserva câmera, joystick e multitouch no celular.

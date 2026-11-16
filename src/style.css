@@ -32,3 +32,8 @@ body.hud-editing #touch-controls{display:block!important}body.hud-editing #hud{d
 #minimap[hidden]{display:none!important}
 
 #minimap-canvas[hidden]{display:none!important}
+
+/* Ocultar só os ajustes: os handles e o rascunho continuam ativos. */
+#hud-edit-reopen{position:absolute;top:max(8px,env(safe-area-inset-top));right:max(8px,env(safe-area-inset-right));z-index:20;pointer-events:auto;touch-action:manipulation;max-width:calc(100vw - 16px);min-height:42px;padding:8px 12px;background:#17231bf5;border:2px solid #b6c5a5;font:12px monospace}
+#hud-edit-toolbar header{position:sticky;top:-10px;background:#17231bf5;z-index:2;padding:5px 0;flex-wrap:wrap}
+#hud-edit-toolbar header #hud-edit-hide{font-size:11px;min-height:34px;padding:5px 8px}

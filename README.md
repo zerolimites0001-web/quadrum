@@ -2,6 +2,22 @@
 
 **Construa, voe e explore um mundo voxel direto no navegador.**
 
+## Novidades · 0.3.6
+
+- Iluminação mais clara no amanhecer/entardecer e noite mais legível.
+- Sol direcional mais forte e sombras locais opcionais (512px, até 5 atualizações/s).
+  Desligue em **☀ → Sombras locais do sol** se pesar no aparelho.
+- Nove silhuetas de árvores, incluindo cerejeiras bifurcadas de copa larga.
+- Espaçamento variável entre troncos, em geral 5–8 blocos, sem distribuição em grade.
+- **Crie um mundo novo** para as árvores do gerador v3. Saves v1/v2 mantêm as
+  formas/distribuição anteriores; recebem a iluminação nova.
+- Editor de HUD: **Ocultar** esconde os ajustes sem sair da edição; **☰ Ajustes HUD**
+  reabre o painel sem perder o rascunho. Ocultar não salva automaticamente.
+
+As árvores são aproximações próprias inspiradas nas espécies, não o algoritmo
+exato do Minecraft. Sombras são locais, não ray tracing nem iluminação global.
+As imagens de referência ficam fora da distribuição.
+
 ## Correção · 0.3.5
 
 - API central `api.ui.panel` para menus de mods: mantém câmera e joystick ativos no celular fora do painel.
@@ -22,7 +38,7 @@
 Jogue direto no navegador, sem instalar. Os mundos ficam salvos no navegador
 desse endereço; use a exportação de mundos para fazer backups ou transferi-los.
 
-![Versão](https://img.shields.io/badge/vers%C3%A3o-0.3.5-77a75c)
+![Versão](https://img.shields.io/badge/vers%C3%A3o-0.3.6-77a75c)
 ![JavaScript](https://img.shields.io/badge/JavaScript-ES_modules-f7df1e)
 ![Three.js](https://img.shields.io/badge/Three.js-local-222222)
 [![Licença MIT](https://img.shields.io/badge/licen%C3%A7a-MIT-blue.svg)](LICENSE)

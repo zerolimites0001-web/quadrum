@@ -24,7 +24,7 @@ export class World {
   const quad=(buf,verts,uv,light,local=null,faceIndex=0)=>{const start=buf.p.length/3;for(let k=0;k<4;k++){buf.p.push(...verts[k]);if(local){const [vx,vy,vz]=local[k],coords=[[1-vz,vy],[vz,vy],[vx,1-vz],[vx,vz],[vx,vy],[1-vx,vy]][faceIndex];buf.uv.push(uv[0]+(uv[2]-uv[0])*coords[0],uv[1]+(uv[3]-uv[1])*coords[1]);}else buf.uv.push(k===0||k===3?uv[0]:uv[2],k<2?uv[1]:uv[3]);buf.color.push(light,light,light);}buf.idx.push(start,start+1,start+2,start,start+2,start+3);};
   for(let y=0;y<HEIGHT;y++)for(let z=0;z<16;z++)for(let x=0;x<16;x++){
    const id=c.data[index(x,y,z)];if(!id)continue;const b=getBlock(id);if(b.renderHidden&&!b.liquid)continue;const layer=b.liquid?'liquid:'+id:b.transparent?'transparent':'opaque';if(!buffers.has(layer))buffers.set(layer,makeBuffer(true,id));const wx=ox+x,wz=oz+z,buf=buffers.get(layer);
-   if(b.shape){for(const part of shapeFaces(id)){const f=FACES[part.face];if(part.boundary&&isFullOccluder(this.get(wx+f.d[0],y+f.d[1],wz+f.d[2])))continue;const verts=part.vertices.map(v=>[x+v[0],y+v[1],z+v[2]]);quad(buf,verts,this.textures.uv(b,f.face),f.light*(.83+.17*y/HEIGHT),part.vertices,part.face);}continue;}
+   if(b.shape){for(const part of shapeFaces(id)){const f=FACES[part.face];if(part.boundary&&isFullOccluder(this.get(wx+f.d[0],y+f.d[1],wz+f.d[2])))continue;const verts=part.vertices.map(v=>[x+v[0],y+v[1],z+v[2]]);quad(buf,verts,this.textures.uv(b,f.face),(.72+.28*f.light),part.vertices,part.face);}continue;}
    if(b.plant){const uv=this.textures.uv(b,'side');quad(buf,[[x+.14,y,z+.14],[x+.86,y,z+.86],[x+.86,y+.85,z+.86],[x+.14,y+.85,z+.14]],uv,.94);quad(buf,[[x+.86,y,z+.14],[x+.14,y,z+.86],[x+.14,y+.85,z+.86],[x+.86,y+.85,z+.14]],uv,.94);continue;}
    for(const f of FACES){const nx=x+f.d[0],ny=y+f.d[1],nz=z+f.d[2];const neighbor=nx>=0&&nx<16&&nz>=0&&nz<16&&ny>=0&&ny<HEIGHT?c.data[index(nx,ny,nz)]:this.get(wx+f.d[0],ny,wz+f.d[2]);const nb=getBlock(neighbor);
     if(neighbor===id&&!nb.shape)continue;
@@ -33,11 +33,11 @@ export class World {
     if(y===0&&f.d[1]===-1)continue;
     const top=b.liquid&&this.get(wx,y+1,wz)!==id?.88:1;
     const vertices=f.v.map(v=>[x+v[0],y+(v[1]?top:0),z+v[2]]);
-    quad(buf,vertices,this.textures.uv(b,f.face),b.emissive?1:Math.min(1,f.light*(.83+.17*y/HEIGHT)));
+    quad(buf,vertices,this.textures.uv(b,f.face),b.emissive?1:Math.min(1,(.72+.28*f.light)));
    }
   }
   this.disposeChunk(c);const group=new THREE.Group();group.position.set(ox,0,oz);
-  for(const b of buffers.values()){if(!b.p.length)continue;const geo=new THREE.BufferGeometry();geo.setAttribute('position',new THREE.Float32BufferAttribute(b.p,3));geo.setAttribute('uv',new THREE.Float32BufferAttribute(b.uv,2));geo.setAttribute('color',new THREE.Float32BufferAttribute(b.color,3));geo.setIndex(b.idx);geo.computeVertexNormals();geo.computeBoundingSphere();const mesh=new THREE.Mesh(geo,b.transparent?this.textures.transparent:this.textures.opaque);if(b.blockId!==null){mesh.userData.blockId=b.blockId;mesh.userData.originalLiquid=true;mesh.visible=!getBlock(b.blockId).renderHidden;}group.add(mesh);}
+  for(const b of buffers.values()){if(!b.p.length)continue;const geo=new THREE.BufferGeometry();geo.setAttribute('position',new THREE.Float32BufferAttribute(b.p,3));geo.setAttribute('uv',new THREE.Float32BufferAttribute(b.uv,2));geo.setAttribute('color',new THREE.Float32BufferAttribute(b.color,3));geo.setIndex(b.idx);geo.computeVertexNormals();geo.computeBoundingSphere();const mesh=new THREE.Mesh(geo,b.transparent?this.textures.transparent:this.textures.opaque);mesh.receiveShadow=!b.transparent;mesh.castShadow=!b.transparent;mesh.userData.voxelShadowCaster=!b.transparent;if(b.blockId!==null){mesh.userData.blockId=b.blockId;mesh.userData.originalLiquid=true;mesh.visible=!getBlock(b.blockId).renderHidden;}group.add(mesh);}
   c.group=group;c.needsMesh=false;this.scene.add(group);this.totalMeshes++;this.events?.emit('chunkMesh',{world:this,chunk:c,group});
  }
  refreshRenderOverrides(){for(const c of this.chunks.values())for(const mesh of c.group?.children||[])if(mesh.userData.originalLiquid)mesh.visible=!getBlock(mesh.userData.blockId).renderHidden;}

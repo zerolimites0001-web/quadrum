@@ -16,7 +16,6 @@
 
 As árvores são aproximações próprias inspiradas nas espécies, não o algoritmo
 exato do Minecraft. Sombras são locais, não ray tracing nem iluminação global.
-As imagens de referência ficam fora da distribuição.
 
 ## Correção · 0.3.5
 
@@ -43,7 +42,7 @@ Cada endereço mantém seus próprios saves no navegador. Para levar um mundo da
 Vercel ao GitHub Pages, exporte o backup em um e importe no outro.
 
 O Pages é atualizado automaticamente a cada push na `main`, publicando somente os
-arquivos públicos do jogo; testes e referências visuais pessoais não são enviados.
+arquivos públicos do jogo; testes não são enviados.
 
 Jogue direto no navegador, sem instalar. Os mundos ficam salvos no navegador
 desse endereço; use a exportação de mundos para fazer backups ou transferi-los.
@@ -393,7 +392,7 @@ server.py              Servidor estático local, sem montagem de diretórios ext
 vendor/                Three.js local e sua licença
 assets/textures/       Texturas e manifesto
 examples/mods/         Exemplos de mods, fontes e ZIP pronto
-examples_ui/           Imagens de referência fornecidas durante o desenvolvimento
+docs/screenshots/      Capturas de tela do Quadrum
 ```
 
 O código do céu e das poças está em `src/sky.js` e `src/puddles.js`.
@@ -418,7 +417,7 @@ redistribuir esse software, inclusive comercialmente, preservando os avisos
 exigidos pela licença. O software é fornecido sem garantias.
 
 **Recursos de terceiros não são relicenciados por essa autorização.** Texturas
-Minecraft/Bedrock Samples, imagens de referência e bibliotecas mantêm seus
+Minecraft/Bedrock Samples e bibliotecas mantêm seus
 próprios direitos e termos, descritos abaixo e nos avisos de terceiros.
 
 ## Créditos e direitos
@@ -428,8 +427,6 @@ próprios direitos e termos, descritos abaixo e nos avisos de terceiros.
 - Texturas do Minecraft/Bedrock Samples pertencem aos respectivos titulares;
   não são arte original do Quadrum e não são automaticamente cobertas pela licença
   do Three.js.
-- Imagens em `examples_ui/` são referências de desenvolvimento, não capturas que
-  comprovem o estado atual do jogo.
 
 Consulte [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) e os termos dos recursos
 antes de redistribuir. A MIT do código do Quadrum não altera os direitos de

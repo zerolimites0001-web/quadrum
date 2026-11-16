@@ -66,6 +66,23 @@ o shader de água de um pacote continua sendo opcional.
 > nem um produto oficial da Mojang/Microsoft. Muitos blocos são decorativos;
 > sobrevivência, mobs, máquinas, redstone funcional e multiplayer ainda não existem.
 
+## Capturas de tela
+
+Imagens do Quadrum no celular, enviadas pelo autor. Desempenho e aparência variam
+conforme aparelho, distância de visão e configurações.
+
+| Vila vista de cima | Floresta |
+| --- | --- |
+| ![Vila procedural com casas e caminhos, vista de cima](docs/screenshots/vila-panorama.png) | ![Árvores e vegetação com controles de toque](docs/screenshots/floresta.png) |
+
+| Terreno e biomas | Vila no deserto |
+| --- | --- |
+| ![Panorama do terreno com transição entre biomas](docs/screenshots/terreno-e-biomas.png) | ![Casas de arenito e caminhos de uma vila no deserto](docs/screenshots/vila-deserto.png) |
+
+| Bosque de cerejeiras | Cerejeira de perto |
+| --- | --- |
+| ![Copas rosas do bosque de cerejeiras vistas de cima](docs/screenshots/cerejeiras-panorama.png) | ![Tronco bifurcado e copa de uma cerejeira](docs/screenshots/cerejeira-detalhe.png) |
+
 ## Navegação
 
 - [Jogar online](https://quadrum-chi.vercel.app/)

@@ -9,6 +9,7 @@ import {Environment} from './environment.js';
 import {FirstPerson} from './first-person.js';
 import {BlockParticles} from './block-particles.js';
 import {Minimap} from './minimap.js';
+import {applyGraphics} from './graphics.js';
 export class Game {
  constructor(storage,settings,ui){this.storage=storage;this.settings=settings;this.ui=ui;this.canvas=document.getElementById('game');this.textures=new Textures();this.ready=false;this.running=false;this.paused=true;this.selected=0;this.hotbar=[...DEFAULT_HOTBAR];this.lastAction=0;this.lastSave=0;this.saving=null;
   this.controls=new Controls(this.canvas,{look:(x,y)=>this.player?.look(x,y,this.settings.sensitivity),pause:()=>this.ui.pause(),inventory:()=>this.ui.inventory(),slot:i=>this.select(i),scroll:d=>this.select((this.selected+d+9)%9),fly:()=>this.toggleFly(),pick:()=>this.pick()});
@@ -20,7 +21,7 @@ export class Game {
  init(progress=()=>{}){if(this.ready)return Promise.resolve();if(this.initializing)return this.initializing;this.initializing=this.initialize(progress).finally(()=>{this.initializing=null;});return this.initializing;}
  async initialize(progress){if(this.ready)return;
   try{this.renderer=new THREE.WebGLRenderer({canvas:this.canvas,antialias:false,powerPreference:'high-performance',alpha:false});}catch{throw new Error('WebGL 2 indisponível. Ative a aceleração gráfica ou use um navegador atualizado.');}
-  this.renderer.setPixelRatio(Math.min(devicePixelRatio||1,1.5));this.renderer.setClearColor(0x8dc4e8);this.renderer.outputColorSpace=THREE.SRGBColorSpace;this.renderer.sortObjects=true;
+  this.applyGraphicsSettings();this.renderer.setClearColor(0x8dc4e8);this.renderer.outputColorSpace=THREE.SRGBColorSpace;this.renderer.sortObjects=true;
   this.scene=new THREE.Scene();this.scene.background=new THREE.Color(0x8dc4e8);this.camera=new THREE.PerspectiveCamera(this.settings.fov,1,.06,160);
   this.scene.add(new THREE.HemisphereLight(0xddecff,0x8f8a69,1.45));const sun=new THREE.DirectionalLight(0xffefcf,1.4);sun.position.set(80,120,50);this.scene.add(sun);
   this.outline=new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.BoxGeometry(1.008,1.008,1.008)),new THREE.LineBasicMaterial({color:0x171f13,transparent:true,opacity:.8}));this.scene.add(this.outline);this.outline.visible=false;
@@ -36,7 +37,8 @@ export class Game {
  }
  bindWorldEvents(){if(this.unbindWorld)return;const bus=this.mods?.bus;if(!bus)return;const offMesh=bus.on('chunkMesh',({chunk})=>this.minimap?.mark(chunk.key));const offDispose=bus.on('chunkDispose',({chunk})=>this.minimap?.remove(chunk.key));const offChange=bus.on('blockChange',({x,z})=>{if(this.minimap)this.minimap.mark(Math.floor(x/16)+','+Math.floor(z/16));});this.unbindWorld=()=>{offMesh();offDispose();offChange();};}
  resize(){if(!this.renderer)return;const w=window.innerWidth,h=window.innerHeight;this.renderer.setSize(w,h,false);this.camera.aspect=w/h;this.camera.updateProjectionMatrix();this.firstPerson?.resize(w,h);}
- applySettings(){this.controls.setTouch(this.settings.touch||matchMedia('(pointer:coarse)').matches);if(!this.camera)return;this.camera.fov=this.settings.fov;this.camera.far=(this.settings.distance+2)*16;this.camera.updateProjectionMatrix();this.scene.fog=new THREE.Fog(0x8dc4e8,this.settings.distance*16*.48,(this.settings.distance+.8)*16);this.world&&(this.world.lastCenter='');if(this.firstPerson){this.firstPerson.enabled=this.settings.firstPerson!==false;this.firstPerson.showHeld=this.settings.heldBlock!==false;this.firstPerson.bob=this.settings.handBob!==false;this.firstPerson.applyPose();}}
+ applyGraphicsSettings(){Object.assign(this.settings,applyGraphics(this.renderer,this.canvas,this.settings));if(this.environment){this.environment.sunShadowsEnabled=this.settings.shadows;if(this.environment.state)this.environment.update(0);else this.environment.sunShadows.update(false,0,0);}}
+ applySettings(){this.applyGraphicsSettings();this.controls.setTouch(this.settings.touch||matchMedia('(pointer:coarse)').matches);if(!this.camera)return;this.camera.fov=this.settings.fov;this.camera.far=(this.settings.distance+2)*16;this.camera.updateProjectionMatrix();this.scene.fog=new THREE.Fog(0x8dc4e8,this.settings.distance*16*.48,(this.settings.distance+.8)*16);this.world&&(this.world.lastCenter='');if(this.firstPerson){this.firstPerson.enabled=this.settings.firstPerson!==false;this.firstPerson.showHeld=this.settings.heldBlock!==false;this.firstPerson.bob=this.settings.handBob!==false;this.firstPerson.applyPose();}}
  setPaused(paused){this.paused=paused;if(paused)this.firstPerson?.reset();this.mods?.bus.emit(paused?'pause':'resume',{game:this});this.controls.enabled=!paused&&this.running;this.controls.clear();if(paused)this.controls.unlock();else{this.lastTime=performance.now();this.controls.lock();}if(this.running)this.render();}
  select(slot){if(!Number.isInteger(slot)||slot<0||slot>8)return;this.selected=slot;this.firstPerson?.select(this.hotbar[slot]);this.ui.selectSlot(slot,getEntry(this.hotbar[slot]).name);this.mods?.bus.emit('slotChange',{slot,id:this.hotbar[slot]});}
  equip(id){if(!(typeof id==='string'?ITEMS.has(id):BLOCKS[id]&&id))return;this.hotbar[this.selected]=id;this.ui.renderHotbar();this.select(this.selected);this.sound('place');}

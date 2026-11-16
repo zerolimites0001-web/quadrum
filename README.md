@@ -2,6 +2,19 @@
 
 **Construa, voe e explore um mundo voxel direto no navegador.**
 
+## Novidades · 0.3.7
+
+Novo menu em **Ajustes → Gráficos** e **Pausa → Gráficos**:
+
+- Sombras reais opcionais, **desligadas por padrão**, com liberação dos mapas GPU ao desligar.
+- Pixel ratio absoluto de **0,5 a 2**, padrão **1**, sem multiplicar pelo DPR do aparelho.
+- Filtros **Normal (sem filtro), Vívido e Clássico**. Não há filtro Água/Ocean.
+- Preferências globais salvas no navegador e botão para restaurar os padrões.
+- Saves antigos não religam sombras sozinhos; a iluminação mais clara continua sem sombras.
+
+Para desempenho, use pixel ratio 0,5–1 e deixe sombras/filtros desligados. Pixel ratio
+2 desenha quatro vezes mais pixels que 1; os filtros opcionais também podem ter custo.
+
 ## Novidades · 0.3.6
 
 - Iluminação mais clara no amanhecer/entardecer e noite mais legível.
@@ -47,7 +60,7 @@ arquivos públicos do jogo; testes não são enviados.
 Jogue direto no navegador, sem instalar. Os mundos ficam salvos no navegador
 desse endereço; use a exportação de mundos para fazer backups ou transferi-los.
 
-![Versão](https://img.shields.io/badge/vers%C3%A3o-0.3.6-77a75c)
+![Versão](https://img.shields.io/badge/vers%C3%A3o-0.3.7-77a75c)
 ![JavaScript](https://img.shields.io/badge/JavaScript-ES_modules-f7df1e)
 ![Three.js](https://img.shields.io/badge/Three.js-local-222222)
 [![Licença MIT](https://img.shields.io/badge/licen%C3%A7a-MIT-blue.svg)](LICENSE)

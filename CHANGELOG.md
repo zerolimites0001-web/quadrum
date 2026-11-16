@@ -1,5 +1,14 @@
 # Histórico
 
+## 0.3.7
+
+- Menu de gráficos acessível pelos ajustes e pela pausa.
+- Padrões leves: sombras desligadas, pixel ratio 1 e filtro Normal.
+- Pixel ratio absoluto ajustável de 0,5 a 2; filtros opcionais Vívido e Clássico.
+- Sombras OFF desativam o passe e liberam mapas GPU; saves antigos não as reativam.
+- Preferências persistidas no navegador e restauração dos padrões.
+- Filtro Água/Ocean removido a pedido do usuário. Testes e referências ficam fora da distribuição.
+
 ## 0.3.6
 
 - Iluminação de preenchimento mais clara ao amanhecer/entardecer e durante a noite.

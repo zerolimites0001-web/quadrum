@@ -28,3 +28,6 @@ coverage/
 test-results/
 playwright-report/
 .github/workflows/tests.yml
+
+# Referências visuais pessoais: não publicar.
+/examples_ui/

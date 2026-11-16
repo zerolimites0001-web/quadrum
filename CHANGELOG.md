@@ -1,5 +1,13 @@
 # Histórico
 
+## 0.3.5
+
+- API central de painéis de mods (`api.ui.panel`) preserva câmera, joystick e multitouch no celular.
+- Coordenação de múltiplos painéis no desktop, sem devolver controles antes do último fechar.
+- Limpeza automática na pausa, saída do mundo e desativação do mod.
+- Documentação para migrar menus que manipulam controles diretamente.
+- Correção aprovada pelo usuário no LAB com mod mínimo; testes permanecem locais.
+
 ## 0.3.4
 
 - Partículas com a textura do bloco ao colocar/quebrar, incluindo portas e lajes.

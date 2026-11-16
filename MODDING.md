@@ -286,3 +286,31 @@ para preservar a compatibilidade com os saves aprovados no laboratório. Esse no
 interno não significa que o recurso esteja desativado. As variantes ficam ocultas
 no inventário, que mostra apenas as peças-base. O raycast devolve `point` e `bounds`
 para a forma atingida; não presuma mais que todo bloco sólido ocupa o cubo inteiro.
+
+
+## Painéis gerenciados · Quadrum 0.3.5
+
+
+```js
+const node = await api.ui.mount('<section class="meu-painel">Meu menu</section>');
+const panel = api.ui.panel(node.querySelector('.meu-painel'));
+api.ui.button('Abrir', () => panel.open());
+// panel.close(), panel.toggle(), panel.isOpen e panel.dispose().
+```
+
+Sem opções específicas de toque. `api.ui.panel(element)` começa fechado e marca
+apenas o elemento como interativo. No modo de toque, abrir/fechar **não** desliga
+controles, limpa ações/joystick nem libera o pointer lock. O mundo fora do painel
+continua recebendo dedos independentes. A área visível do painel recebe seus
+próprios toques; não coloque um overlay de tela inteira se quiser olhar ao redor.
+
+No desktop, o gerenciador libera o mouse e suspende entrada enquanto existir
+algum painel gerenciado aberto. Fechar apenas um de dois painéis não devolve o
+controle antes da hora. Pausa/saída fecham os painéis; desativar o mod libera seus
+recursos sem religar controles durante pausa. `close({lock:false})` fecha sem
+solicitar recaptura do mouse. O descarte é automático.
+
+Não manipule `game.controls.enabled`, `clear()` ou `unlock()` para abrir menus.
+Esta é uma API aditiva disponível a partir do Quadrum 0.3.5; teste `if (api.ui.panel)` para compatibilidade com
+versões anteriores. Ela **não é sandbox**: mods antigos com acesso total ainda
+podem bloquear entrada diretamente ou cobrir a tela com CSS. Migre-os para a API.

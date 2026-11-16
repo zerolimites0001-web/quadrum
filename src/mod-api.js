@@ -3,6 +3,7 @@ import {BLOCKS,ID,ITEMS,registerBlock,registerItem,getBlock,getEntry,contentKey}
 import {resolveAssets} from './mod-manifest.js';
 import {CHUNK,HEIGHT,SEA,index} from './terrain.js';
 import {withoutTracking} from './kill.js';
+import {ModPanels} from './mod-panels.js';
 function disposeObject(object){object.traverse?.(child=>{child.geometry?.dispose();for(const material of Array.isArray(child.material)?child.material:[child.material])material?.dispose();});}
 export function createModAPI(manager,record){
  const game=manager.game,manifest=record.manifest,ns=manifest.uuid,scope=record.scope||null;let root=null;
@@ -37,6 +38,7 @@ export function createModAPI(manager,record){
   },
   resources:{text:async path=>(await fetchAsset(path)).text(),json:async path=>(await fetchAsset(path)).json(),blob:async path=>(await fetchAsset(path)).blob()},
   ui:{
+   panel(element){assertActive();manager.panels??=new ModPanels(game,manager.bus);const panel=manager.panels.create(element);own(()=>panel.dispose());return panel;},
    get root(){if(!root){root=document.createElement('div');root.className='mod-root';root.dataset.mod=ns;document.body.append(root);own(()=>root.remove());}return root;},
    async mount(pathOrHTML,{parent}={}){const inline=pathOrHTML.trim().startsWith('<'),base=inline?manifest.baseURL:url(pathOrHTML),text=inline?pathOrHTML:await(await fetchAsset(pathOrHTML)).text();const node=document.createElement('div');node.dataset.mod=ns;node.innerHTML=text;
     // HTML é interface; o código é carregado como módulo JS, não via innerHTML.

@@ -1,5 +1,15 @@
 # Histórico
 
+## 0.3.8
+
+- Geração de terreno movida para um Web Worker: chunks não travam mais a thread principal.
+- Mesher otimizado: normais por face sem `computeVertexNormals` e varredura só até a altura real do chunk.
+- Corrige "paredes" falsas entre chunks, materializando vizinhos do worker antes de meshar.
+- Chunk provisório evita o jogador cair no vazio enquanto os dados chegam.
+- Braço e item na primeira pessoa refeitos: antebraço, mão e polegar conectados; itens pequenos com escala correta.
+- Inventário mais rápido: cache de ícones e busca com debounce.
+- Correções promovidas do LAB a pedido do usuário; testes e referências visuais não distribuídos.
+
 ## 0.3.7
 
 - Menu de gráficos acessível pelos ajustes e pela pausa.

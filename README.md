@@ -2,6 +2,13 @@
 
 **Construa, voe e explore um mundo voxel direto no navegador.**
 
+## Novidades · 0.3.8
+
+- Geração de terreno em **Web Worker**: os chunks não travam mais a thread principal e o FPS fica estável ao explorar.
+- Mesher mais rápido (normais por face e corte da coluna vazia) e sem "paredes" falsas entre chunks.
+- Braço e item na mão refeitos, com itens pequenos na escala certa.
+- Inventário abre e busca mais rápido.
+
 ## Novidades · 0.3.7
 
 Novo menu em **Ajustes → Gráficos** e **Pausa → Gráficos**:
@@ -60,7 +67,7 @@ arquivos públicos do jogo; testes não são enviados.
 Jogue direto no navegador, sem instalar. Os mundos ficam salvos no navegador
 desse endereço; use a exportação de mundos para fazer backups ou transferi-los.
 
-![Versão](https://img.shields.io/badge/vers%C3%A3o-0.3.7-77a75c)
+![Versão](https://img.shields.io/badge/vers%C3%A3o-0.3.8-77a75c)
 ![JavaScript](https://img.shields.io/badge/JavaScript-ES_modules-f7df1e)
 ![Three.js](https://img.shields.io/badge/Three.js-local-222222)
 [![Licença MIT](https://img.shields.io/badge/licen%C3%A7a-MIT-blue.svg)](LICENSE)

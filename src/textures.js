@@ -53,5 +53,9 @@ export class Textures {
   if(b.pattern==='metal'){c.strokeStyle='#ffffff55';c.strokeRect(.5,.5,15,15);c.strokeStyle='#0004';c.strokeRect(1.5,1.5,13,13);}
  }
  uv(b,face){const t=this.tiles.get(b[face+'Key']||b.sideKey)||this.tiles.values().next().value;if(!t)return[0,0,1/32,1/32];return[(t.x+.02)/SIZE,1-(t.y+15.98)/SIZE,(t.x+15.98)/SIZE,1-(t.y+.02)/SIZE];}
- icon(id){if(!this.icons.has(id)){const b=getEntry(id);const t=this.tiles.get(b.sideKey);if(t)this.icons.set(id,t.tile);else{const tile=document.createElement('canvas');tile.width=tile.height=16;this.generate(tile.getContext('2d'),b,b.texture||'generated:missing');this.icons.set(id,tile);}}const tile=this.icons.get(id);const c=document.createElement('canvas');c.width=c.height=32;const ctx=c.getContext('2d');ctx.imageSmoothingEnabled=false;ctx.drawImage(tile,0,0,32,32);return c;}
+ icon(id){if(!this.icons.has(id)){const b=getEntry(id);const t=this.tiles.get(b.sideKey);if(t)this.icons.set(id,t.tile);else{const tile=document.createElement('canvas');tile.width=tile.height=16;this.generate(tile.getContext('2d'),b,b.texture||'generated:missing');this.icons.set(id,tile);}}const tile=this.icons.get(id);
+  // cache do canvas 32x32 final: evita recriar/drawImage a cada abertura do inventário
+  if(!this.iconCanvases)this.iconCanvases=new Map();
+  const hit=this.iconCanvases.get(id);if(hit&&hit._tile===tile)return hit;
+  const c=document.createElement('canvas');c.width=c.height=32;const ctx=c.getContext('2d');ctx.imageSmoothingEnabled=false;ctx.drawImage(tile,0,0,32,32);c._tile=tile;this.iconCanvases.set(id,c);return c;}
 }

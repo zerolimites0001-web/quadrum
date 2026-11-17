@@ -10,6 +10,7 @@ import {FirstPerson} from './first-person.js';
 import {BlockParticles} from './block-particles.js';
 import {Minimap} from './minimap.js';
 import {applyGraphics} from './graphics.js';
+import {TerrainBridge} from './terrain-bridge.js';
 export class Game {
  constructor(storage,settings,ui){this.storage=storage;this.settings=settings;this.ui=ui;this.canvas=document.getElementById('game');this.textures=new Textures();this.ready=false;this.running=false;this.paused=true;this.selected=0;this.hotbar=[...DEFAULT_HOTBAR];this.lastAction=0;this.lastSave=0;this.saving=null;
   this.controls=new Controls(this.canvas,{look:(x,y)=>this.player?.look(x,y,this.settings.sensitivity),pause:()=>this.ui.pause(),inventory:()=>this.ui.inventory(),slot:i=>this.select(i),scroll:d=>this.select((this.selected+d+9)%9),fly:()=>this.toggleFly(),pick:()=>this.pick()});
@@ -29,8 +30,35 @@ export class Game {
   this.canvas.addEventListener('webglcontextlost',e=>{e.preventDefault();if(this.running)this.ui.pause();this.ui.toast('Contexto gráfico perdido. Seu mundo foi preservado; recarregue a página.');this.save().catch(()=>{});});
  }
  async start(meta,onProgress){const remap=restorePalette(meta.blockPalette);await this.init(v=>onProgress(v*.65,'Carregando texturas'));await this.textures.sync();if(this.world)this.world.dispose();const edits=await this.storage.edits(meta.id);this.world=new World(meta,this.scene,this.textures,edits,this.mods?.bus);this.player=new Player(this.camera,this.world,meta.player);this.hotbar=meta.hotbar?.length===9?meta.hotbar.map((id,i)=>typeof id==='string'&&id.startsWith('item:')?id:BLOCKS[remap.get(id)??id]&&id?(remap.get(id)??id):DEFAULT_HOTBAR[i]):[...DEFAULT_HOTBAR];this.selected=0;this.firstPerson.reset();
+  // Geração em Web Worker: tira o custo do terreno da thread principal.
+  onProgress(.66,'Preparando gerador de terreno');
+  this.terrainBridge?.dispose();
+  this.terrainBridge=new TerrainBridge(this.world);
+  const bridgeOk=await this.terrainBridge.start();
+  if(bridgeOk){this.world.bridge=this.terrainBridge;}
+  else{this.world.bridge=null;this.ui.toast&&this.ui.toast('Gerador em segundo plano indisponível; usando modo normal.');}
   const p=this.player.position;this.world.stream(p.x,p.z,this.settings.distance);
-  for(let i=0;i<9&&this.world.queue.length;i++){this.world.update(0);onProgress(.65+(i+1)/9*.35,'Gerando o terreno');await new Promise(r=>setTimeout(r,0));}
+  if(bridgeOk){
+    // Pede ao worker a área inicial e aguarda os dados (sem travar a UI:
+    // cedemos ao event loop entre lotes). Timeout de segurança cai no sync.
+    const cx=Math.floor(p.x/16),cz=Math.floor(p.z/16);
+    this.terrainBridge.maxInflight=24;
+    this.terrainBridge.requestArea(cx,cz,this.settings.distance);
+    let guard=0;
+    while(this.world.queue.length&&guard<600){
+      // mantém o worker ocupado com o que falta na fila
+      for(const item of this.world.queue)this.terrainBridge.request(item.cx,item.cz);
+      this.world.update(0);
+      onProgress(.66+Math.min(.30,guard/600*.30),'Gerando o terreno');
+      await new Promise(r=>setTimeout(r,0));
+      guard++;
+      // Se há bridge e nada pudemos meshar, dá um respiro maior para o worker entregar
+      if(guard%3===0)await new Promise(r=>setTimeout(r,0));
+    }
+    this.terrainBridge.maxInflight=6;
+  }else{
+    for(let i=0;i<9&&this.world.queue.length;i++){this.world.update(0);onProgress(.65+(i+1)/9*.35,'Gerando o terreno');await new Promise(r=>setTimeout(r,0));}
+  }
   // Evita nascer dentro de uma árvore nova ou de blocos importados.
   for(let i=0;i<12;i++){const x=Math.floor(p.x),z=Math.floor(p.z),y=Math.floor(p.y);if(!this.world.solid(x,y,z)&&!this.world.solid(x,y+1,z))break;p.y++;}
   this.player.updateCamera();this.running=true;this.paused=false;this.lastSave=performance.now();this.lastTime=performance.now();this.controls.enabled=true;this.applySettings();this.ui.renderHotbar();this.select(0);this.ui.flyState(this.player.flying);this.environment.start(meta);this.particles?.clear();this.bindWorldEvents();this.minimap?.start();this.mods?.bus.emit('worldEnter',{game:this,world:this.world,player:this.player});this.render();
@@ -64,10 +92,13 @@ export class Game {
   const world=this.world,meta={...world.meta,player:this.player.serialize(),hotbar:[...this.hotbar],blockPalette:blockPalette(),environment:this.environment?.save(),updatedAt:Date.now()},chunks=world.snapshotDirty();for(const c of chunks)world.dirty.delete(c.key);
   this.saving=this.storage.save(meta,chunks);try{await this.saving;world.meta=meta;this.lastSave=performance.now();this.ui.saved(meta.updatedAt);}catch(e){for(const c of chunks)world.dirty.add(c.key);throw e;}finally{this.saving=null;}
  }
- async exit(){this.setPaused(true);await this.save();this.mods?.bus.emit('worldLeave',{world:this.world,player:this.player});this.running=false;this.firstPerson?.reset();this.environment?.stop();this.minimap?.stop();this.particles?.clear();this.unbindWorld?.();this.unbindWorld=null;this.world.dispose();this.world=null;this.outline.visible=false;this.renderer.clear();}
+ async exit(){this.setPaused(true);await this.save();this.mods?.bus.emit('worldLeave',{world:this.world,player:this.player});this.running=false;this.firstPerson?.reset();this.environment?.stop();this.minimap?.stop();this.particles?.clear();this.unbindWorld?.();this.unbindWorld=null;this.terrainBridge?.dispose();this.terrainBridge=null;this.world.dispose();this.world=null;this.outline.visible=false;this.renderer.clear();}
  render(){if(this.renderer&&this.scene){this.environment?.reflect();this.mods?.bus.emit('beforeRender',{game:this,renderer:this.renderer,scene:this.scene,camera:this.camera});this.renderer.render(this.scene,this.camera);this.mods?.bus.emit('afterRender',{game:this,renderer:this.renderer});this.firstPerson?.render(this.renderer,{running:this.running,paused:this.paused});}}
  frame(now){requestAnimationFrame(this.frame);const elapsed=Math.min(1,Math.max(0,(now-this.lastTime)/1000)),dt=Math.min(.05,elapsed);this.lastTime=now;if(!this.running)return;
-  if(!this.paused){const p=this.player.position;this.world.stream(p.x,p.z,this.settings.distance);const steps=Math.max(1,Math.ceil(dt/.016));for(let i=0;i<steps;i++)this.player.update(dt/steps,this.controls);this.mods?.bus.emit('tick',{dt,time:now/1000,game:this,world:this.world,player:this.player});this.world.update(5);this.environment?.update(elapsed);this.particles?.update(elapsed,this.world);this.minimap?.update();this.targetBlock();
+  if(!this.paused){const p=this.player.position;this.world.stream(p.x,p.z,this.settings.distance);
+   // alimenta o worker com os chunks que faltam na fila (fora da thread principal)
+   if(this.world.bridge&&this.terrainBridge?.ready){for(const item of this.world.queue)this.terrainBridge.request(item.cx,item.cz);const bcx=Math.floor(p.x/16),bcz=Math.floor(p.z/16);this.terrainBridge.requestArea(bcx,bcz,this.settings.distance);}
+   const steps=Math.max(1,Math.ceil(dt/.016));for(let i=0;i<steps;i++)this.player.update(dt/steps,this.controls);this.mods?.bus.emit('tick',{dt,time:now/1000,game:this,world:this.world,player:this.player});this.world.update(5);this.environment?.update(elapsed);this.particles?.update(elapsed,this.world);this.minimap?.update();this.targetBlock();
    const action=this.controls.actions.has('use')?'use':this.controls.actions.has('break')?'break':this.controls.actions.has('place')?'place':null;
    if(action&&(now-this.lastAction>(getEntry(this.hotbar[this.selected]).cooldown??.165)*1000||this.lastActionKind!==action)){this.action(action);this.lastAction=now;}if(!action)this.lastAction=0;this.lastActionKind=action;this.firstPerson?.update(elapsed,{player:this.player,daylight:this.environment?.skyUniforms.uDay.value??1,cloud:this.environment?.skyUniforms.uCloud.value??0});
    document.getElementById('water-overlay').style.display=this.player.underwater?'block':'none';

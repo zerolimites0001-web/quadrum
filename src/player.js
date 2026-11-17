@@ -7,7 +7,12 @@ export class Player {
  constructor(camera,world,saved){this.camera=camera;this.world=world;const spawn=world.terrain.spawn();this.position=new THREE.Vector3(spawn.x,spawn.y,spawn.z);this.velocity=new THREE.Vector3();this.yaw=0;this.pitch=0;this.flying=false;this.onGround=false;if(saved){if(['x','y','z'].every(k=>Number.isFinite(saved[k])&&Math.abs(saved[k])<3e7))this.position.set(saved.x,Math.max(1,Math.min(HEIGHT+120,saved.y)),saved.z);this.yaw=Number.isFinite(saved.yaw)?saved.yaw:0;this.pitch=Number.isFinite(saved.pitch)?Math.max(-1.55,Math.min(1.55,saved.pitch)):0;this.flying=!!saved.flying;}this.updateCamera();}
  look(dx,dy,sensitivity){this.yaw-=dx*.0023*sensitivity;this.pitch=Math.max(-Math.PI/2+.01,Math.min(Math.PI/2-.01,this.pitch-dy*.0023*sensitivity));this.updateCamera();}
  toggleFly(){this.flying=!this.flying;this.velocity.y=0;return this.flying;}
- update(dt,input){const p=this.position,w=this.world;w.ensure(Math.floor(p.x/16),Math.floor(p.z/16));const underwater=getBlock(w.get(Math.floor(p.x),Math.floor(p.y+1),Math.floor(p.z))).liquid;
+ update(dt,input){const p=this.position,w=this.world;const pcx=Math.floor(p.x/16),pcz=Math.floor(p.z/16);w.ensure(pcx,pcz);
+  // Chunk ainda vazio provisório (worker a caminho): não aplica gravidade para não
+  // fazer o jogador cair no void enquanto os dados reais não chegam.
+  const pchunk=w.chunks.get(pcx+','+pcz);
+  if(pchunk&&pchunk.provisional){this.velocity.y=0;this.updateCamera();return;}
+  const underwater=getBlock(w.get(Math.floor(p.x),Math.floor(p.y+1),Math.floor(p.z))).liquid;
   let forward=(input.keys.has('KeyW')?1:0)-(input.keys.has('KeyS')?1:0)-input.joy.y;
   let strafe=(input.keys.has('KeyD')?1:0)-(input.keys.has('KeyA')?1:0)+input.joy.x;const length=Math.hypot(strafe,forward);if(length>1){strafe/=length;forward/=length;}
   const sprint=input.keys.has('ControlLeft')||input.keys.has('ControlRight');const speed=(this.flying?11:underwater?3.2:5.2)*(sprint?1.7:1);

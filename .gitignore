@@ -31,3 +31,6 @@ playwright-report/
 
 # Referências visuais pessoais: não publicar.
 /examples_ui/
+
+# Contexto local entre chats: nunca versionar ou publicar.
+AGENTS.md

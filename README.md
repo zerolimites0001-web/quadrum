@@ -2,54 +2,6 @@
 
 **Construa, voe e explore um mundo voxel direto no navegador.**
 
-## Novidades · 0.3.8
-
-- Geração de terreno em **Web Worker**: os chunks não travam mais a thread principal e o FPS fica estável ao explorar.
-- Mesher mais rápido (normais por face e corte da coluna vazia) e sem "paredes" falsas entre chunks.
-- Braço e item na mão refeitos, com itens pequenos na escala certa.
-- Inventário abre e busca mais rápido.
-
-## Novidades · 0.3.7
-
-Novo menu em **Ajustes → Gráficos** e **Pausa → Gráficos**:
-
-- Sombras reais opcionais, **desligadas por padrão**, com liberação dos mapas GPU ao desligar.
-- Pixel ratio absoluto de **0,5 a 2**, padrão **1**, sem multiplicar pelo DPR do aparelho.
-- Filtros **Normal (sem filtro), Vívido e Clássico**. Não há filtro Água/Ocean.
-- Preferências globais salvas no navegador e botão para restaurar os padrões.
-- Saves antigos não religam sombras sozinhos; a iluminação mais clara continua sem sombras.
-
-Para desempenho, use pixel ratio 0,5–1 e deixe sombras/filtros desligados. Pixel ratio
-2 desenha quatro vezes mais pixels que 1; os filtros opcionais também podem ter custo.
-
-## Novidades · 0.3.6
-
-- Iluminação mais clara no amanhecer/entardecer e noite mais legível.
-- Sol direcional mais forte e sombras locais opcionais (512px, até 5 atualizações/s).
-  Desligue em **☀ → Sombras locais do sol** se pesar no aparelho.
-- Nove silhuetas de árvores, incluindo cerejeiras bifurcadas de copa larga.
-- Espaçamento variável entre troncos, em geral 5–8 blocos, sem distribuição em grade.
-- **Crie um mundo novo** para as árvores do gerador v3. Saves v1/v2 mantêm as
-  formas/distribuição anteriores; recebem a iluminação nova.
-- Editor de HUD: **Ocultar** esconde os ajustes sem sair da edição; **☰ Ajustes HUD**
-  reabre o painel sem perder o rascunho. Ocultar não salva automaticamente.
-
-As árvores são aproximações próprias inspiradas nas espécies, não o algoritmo
-exato do Minecraft. Sombras são locais, não ray tracing nem iluminação global.
-
-## Correção · 0.3.5
-
-- API central `api.ui.panel` para menus de mods: mantém câmera e joystick ativos no celular fora do painel.
-- No desktop, coordena a liberação do mouse entre vários painéis e restaura controles com segurança.
-- Mods devem usar a API; código antigo que desliga controles diretamente precisa ser adaptado.
-
-## Novidades · 0.3.4
-
-- Fragmentos com recortes da própria textura ao colocar e quebrar blocos.
-- Minimapa com norte e direção do jogador; botão 🗺 liga/desliga. Usa apenas chunks carregados.
-- Vilas procedurais com casas, caminhos de cascalho, poço e horta.
-- Crie um mundo novo para testar as vilas; mundos antigos preservam a geração anterior.
-
 ## Jogar online
 
 **[▶ Abrir Quadrum — quadrum-chi.vercel.app](https://quadrum-chi.vercel.app/)**
@@ -422,9 +374,9 @@ Shaders do exemplo de água pertencem ao próprio pacote.
 
 **Os arquivos de testes são mantidos somente no ambiente local de desenvolvimento.**
 Não fazem parte desta distribuição e estão ignorados no Git. Não é necessário
-instalar ferramentas de teste para jogar. A versão 0.3.0 foi conferida localmente
-com 77 casos de lógica e validada visualmente pelo usuário no aparelho antes da
-publicação; isso não garante o mesmo desempenho em todas as GPUs/navegadores.
+instalar ferramentas de teste para jogar. O jogo é validado localmente com testes
+de lógica e conferido visualmente no aparelho antes da publicação; isso não garante
+o mesmo desempenho em todas as GPUs/navegadores.
 
 A CI antiga de testes foi removida para não depender de arquivos que não são mais
 publicados. Para contribuir, veja [CONTRIBUTING.md](CONTRIBUTING.md).

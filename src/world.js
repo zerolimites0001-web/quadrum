@@ -115,7 +115,12 @@ export class World {
    }
   }
   this.disposeChunk(c);const group=new THREE.Group();group.position.set(ox,0,oz);
-  for(const b of buffers.values()){if(!b.p.length)continue;const geo=new THREE.BufferGeometry();geo.setAttribute('position',new THREE.Float32BufferAttribute(b.p,3));geo.setAttribute('uv',new THREE.Float32BufferAttribute(b.uv,2));geo.setAttribute('color',new THREE.Float32BufferAttribute(b.color,3));geo.setAttribute('normal',new THREE.Float32BufferAttribute(b.nrm,3));geo.setIndex(b.idx);geo.computeBoundingSphere();const mesh=new THREE.Mesh(geo,b.transparent?this.textures.transparent:this.textures.opaque);mesh.receiveShadow=!b.transparent;mesh.castShadow=!b.transparent;mesh.userData.voxelShadowCaster=!b.transparent;if(b.blockId!==null){mesh.userData.blockId=b.blockId;mesh.userData.originalLiquid=true;mesh.visible=!getBlock(b.blockId).renderHidden;}group.add(mesh);}
+  for(const b of buffers.values()){if(!b.p.length)continue;const geo=new THREE.BufferGeometry();geo.setAttribute('position',new THREE.Float32BufferAttribute(b.p,3));geo.setAttribute('uv',new THREE.Float32BufferAttribute(b.uv,2));geo.setAttribute('color',new THREE.Float32BufferAttribute(b.color,3));geo.setAttribute('normal',new THREE.Float32BufferAttribute(b.nrm,3));geo.setIndex(b.idx);geo.computeBoundingSphere();
+   // escolhe material: líquidos usam material próprio (depthWrite) p/ não sumirem entre chunks
+   const mat = b.blockId!==null && getBlock(b.blockId).liquid && this.textures.liquid ? this.textures.liquid : (b.transparent?this.textures.transparent:this.textures.opaque);
+   const mesh=new THREE.Mesh(geo,mat);mesh.receiveShadow=!b.transparent;mesh.castShadow=!b.transparent;mesh.userData.voxelShadowCaster=!b.transparent;
+   if(b.blockId!==null){mesh.userData.blockId=b.blockId;mesh.userData.originalLiquid=true;mesh.visible=!getBlock(b.blockId).renderHidden;mesh.renderOrder=1;}
+   group.add(mesh);}
   c.group=group;c.needsMesh=false;this.scene.add(group);this.totalMeshes++;this.events?.emit('chunkMesh',{world:this,chunk:c,group});
  }
  refreshRenderOverrides(){for(const c of this.chunks.values())for(const mesh of c.group?.children||[])if(mesh.userData.originalLiquid)mesh.visible=!getBlock(mesh.userData.blockId).renderHidden;}

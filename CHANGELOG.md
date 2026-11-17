@@ -1,5 +1,11 @@
 # Histórico
 
+## 0.3.9
+
+- Água não "some" mais ao lado de outra: líquidos usam material próprio com `depthWrite` e `renderOrder`, eliminando o z-fighting entre chunks vizinhos.
+- Hotbar não apaga mais ao equipar água: o ícone do bloco nunca quebra a barra (fallback seguro quando a geração do ícone falha).
+- Correções promovidas do LAB a pedido do usuário; testes e referências visuais não distribuídos.
+
 ## 0.3.8
 
 - Geração de terreno movida para um Web Worker: chunks não travam mais a thread principal.

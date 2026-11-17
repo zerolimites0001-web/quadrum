@@ -8,6 +8,10 @@ export class Textures {
   const tex=this.texture=new THREE.CanvasTexture(this.canvas);tex.magFilter=THREE.NearestFilter;tex.minFilter=THREE.NearestFilter;tex.generateMipmaps=false;tex.colorSpace=THREE.SRGBColorSpace;
   this.opaque=new THREE.MeshLambertMaterial({map:tex,vertexColors:true,alphaTest:.35,side:THREE.DoubleSide});
   this.transparent=new THREE.MeshLambertMaterial({map:tex,vertexColors:true,transparent:true,depthWrite:false,alphaTest:.03,side:THREE.DoubleSide});
+  // Líquidos: material próprio com depthWrite ativo evita que a água de um chunk
+  // "suma" (z-fighting) ao ficar ao lado da água de outro chunk. A água é quase
+  // opaca, então escrever profundidade é seguro e resolve o vão/seam.
+  this.liquid=new THREE.MeshLambertMaterial({map:tex,vertexColors:true,transparent:true,depthWrite:true,alphaTest:.03,side:THREE.DoubleSide});
  }
  sync(progress=()=>{}) {
   const run=async()=>{
@@ -53,9 +57,17 @@ export class Textures {
   if(b.pattern==='metal'){c.strokeStyle='#ffffff55';c.strokeRect(.5,.5,15,15);c.strokeStyle='#0004';c.strokeRect(1.5,1.5,13,13);}
  }
  uv(b,face){const t=this.tiles.get(b[face+'Key']||b.sideKey)||this.tiles.values().next().value;if(!t)return[0,0,1/32,1/32];return[(t.x+.02)/SIZE,1-(t.y+15.98)/SIZE,(t.x+15.98)/SIZE,1-(t.y+.02)/SIZE];}
- icon(id){if(!this.icons.has(id)){const b=getEntry(id);const t=this.tiles.get(b.sideKey);if(t)this.icons.set(id,t.tile);else{const tile=document.createElement('canvas');tile.width=tile.height=16;this.generate(tile.getContext('2d'),b,b.texture||'generated:missing');this.icons.set(id,tile);}}const tile=this.icons.get(id);
-  // cache do canvas 32x32 final: evita recriar/drawImage a cada abertura do inventário
-  if(!this.iconCanvases)this.iconCanvases=new Map();
-  const hit=this.iconCanvases.get(id);if(hit&&hit._tile===tile)return hit;
-  const c=document.createElement('canvas');c.width=c.height=32;const ctx=c.getContext('2d');ctx.imageSmoothingEnabled=false;ctx.drawImage(tile,0,0,32,32);c._tile=tile;this.iconCanvases.set(id,c);return c;}
+ icon(id){
+  // Nunca deixe uma exceção (ex.: canvas tainted no getImageData de líquidos)
+  // derrubar a hotbar. Em qualquer falha, devolve um canvas de fallback.
+  try{
+   if(!this.icons.has(id)){const b=getEntry(id);const t=this.tiles.get(b.sideKey);if(t)this.icons.set(id,t.tile);else{const tile=document.createElement('canvas');tile.width=tile.height=16;this.generate(tile.getContext('2d'),b,b.texture||'generated:missing');this.icons.set(id,tile);}}const tile=this.icons.get(id);
+   if(!this.iconCanvases)this.iconCanvases=new Map();
+   const hit=this.iconCanvases.get(id);if(hit&&hit._tile===tile)return hit;
+   const c=document.createElement('canvas');c.width=c.height=32;const ctx=c.getContext('2d');ctx.imageSmoothingEnabled=false;ctx.drawImage(tile,0,0,32,32);c._tile=tile;this.iconCanvases.set(id,c);return c;
+  }catch(err){
+   console.warn('Quadrum: falha ao gerar ícone do bloco',id,err&&err.message);
+   try{const c=document.createElement('canvas');c.width=c.height=32;const ctx=c.getContext('2d');const b=getEntry(id)||{};ctx.fillStyle=b.color||'#888';ctx.fillRect(0,0,32,32);ctx.strokeStyle='#0006';ctx.lineWidth=2;ctx.strokeRect(1,1,30,30);return c;}catch{return null;}
+  }
+ }
 }

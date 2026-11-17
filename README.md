@@ -19,7 +19,7 @@ arquivos públicos do jogo; testes não são enviados.
 Jogue direto no navegador, sem instalar. Os mundos ficam salvos no navegador
 desse endereço; use a exportação de mundos para fazer backups ou transferi-los.
 
-![Versão](https://img.shields.io/badge/vers%C3%A3o-0.3.8-77a75c)
+![Versão](https://img.shields.io/badge/vers%C3%A3o-0.3.9-77a75c)
 ![JavaScript](https://img.shields.io/badge/JavaScript-ES_modules-f7df1e)
 ![Three.js](https://img.shields.io/badge/Three.js-local-222222)
 [![Licença MIT](https://img.shields.io/badge/licen%C3%A7a-MIT-blue.svg)](LICENSE)
